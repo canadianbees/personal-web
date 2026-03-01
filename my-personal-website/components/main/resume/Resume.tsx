@@ -18,7 +18,7 @@ const reviews = [
   {
     name: "Snap Inc.",
     username: "August 2024 - Present",
-    body: "Scenarium Team, Growth Web Team, Media Delivery Platoform Team",
+    body: "Scenarium Team, Growth Web Team, Media Delivery Platform Team",
     img:( <img
   src="/snapchat.svg"
   width="70"
