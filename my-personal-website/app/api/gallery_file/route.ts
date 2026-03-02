@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
 import sharp from "sharp";
 
-
-const GCS_SERVICE_ACCOUNT_KEY = process.env.GCS_SERVICE_ACCOUNT_KEY
+const GCS_SERVICE_ACCOUNT_KEY = process.env.GCS_SERVICE_ACCOUNT_KEY;
 
 export async function GET(req: NextRequest) {
   const fileName = req.nextUrl.searchParams.get("name");
   if (!fileName)
     return NextResponse.json({ error: "No file specified" }, { status: 400 });
 
-   if (!GCS_SERVICE_ACCOUNT_KEY)
-    return NextResponse.json({ error: "No service key specified" }, { status: 400 });
+  if (!GCS_SERVICE_ACCOUNT_KEY)
+    return NextResponse.json(
+      { error: "No service key specified" },
+      { status: 400 },
+    );
 
   const width = 800;
 
@@ -28,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     const gcsUrl = `https://storage.googleapis.com/storage/v1/b/${process.env.PHOTO_BUCKET}/o/${encodeURIComponent(fileName)}?alt=media`;
     const res = await fetch(gcsUrl, {
-      headers: { Authorization: `Bearer ${token.token}` },
+      headers: { Authorization: `Bearer ${token.token}`, cache: "no-store" },
     });
 
     const buffer = Buffer.from(await res.arrayBuffer());
