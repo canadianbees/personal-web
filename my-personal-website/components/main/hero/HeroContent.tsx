@@ -5,7 +5,7 @@ import { MorphingText } from "@/components/ui/morphing-text"
 import { OrbitingCircles } from '@/components/ui/orbiting-circles';
 import StackIcon from "tech-stack-icons";
 import { AuroraText } from '@/components/ui/aurora-text';
-import { Avatar } from "@heroui/avatar";
+import { Avatar } from "@mui/material";
 import { DeviconCplusplus } from '../../icons/DeviconCplusplus'
 import DeviconTypescript from '@/components/icons/DeviconTypescript';
 import DeviconPython from '@/components/icons/DeviconPython';
@@ -31,7 +31,7 @@ const HeroContent = () => {
           <MorphingText texts={["celina alzenor", "software engineer", "platypus enjoyer", "solitaire enthusiast"]} />
           <motion.div
             variants={slideInFromLeft(0.8)}
-            className="flex flex-col md:mt-15 text-lg text-gray-400 max-w-full md:max-w-150 gap-18">
+            className="flex flex-col md:mt-15 text-lg text-gray-400 max-w-full md:max-w-150">
             <AuroraText speed={5}>
               Seeking new opportunites and roles
             </AuroraText>
@@ -54,7 +54,7 @@ const HeroContent = () => {
           <DeviconTypescript width="8em" height="8em" />
           <DeviconJava width="8em" height="8em" />
         </OrbitingCircles>
-        <Avatar isBordered color="success" className="w-135 h-136 text-large z-[-1]" src='/DSC01275.jpg' />
+        <Avatar className="z-[-1]" sx={{ width: 540, height: 544 }} src='/DSC01275.jpg' />
         <OrbitingCircles radius={200} iconSize={50} reverse path={false}>
           <StackIcon name="gcloud" variant="dark" />
           <Docker size={100} color="#2560FF" />

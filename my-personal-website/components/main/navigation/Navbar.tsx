@@ -26,13 +26,13 @@ const Navbar = () => {
       transition={{ type: "spring", damping: 20, stiffness: 150 }}
       className="fixed top-0 left-0 right-0 z-50 flex justify-center py-4 px-4"
     >
-      <div className="flex gap-4 px-5 py-3 rounded-full backdrop-blur-md bg-white/5 border border-white/10 max-w-full scrollbar-none">
+      <div className="relative flex gap-4 px-5 py-3 text-xs lg:text-sm justify-center rounded-full backdrop-blur-md bg-white/5 border border-white/10 max-w-full scrollbar-none">
         {sections.map(({ label, href }) => (
           <a
             key={href}
             href={href}
             onClick={(e) => handleClick(e, href)}
-            className="font-mono text-sm text-white/60 hover:text-yellow-300 transition-colors duration-200 whitespace-nowrap"
+            className="font-mono text-white/60 hover:text-yellow-300 transition-colors duration-200 whitespace-nowrap"
           >
             {label}
           </a>
