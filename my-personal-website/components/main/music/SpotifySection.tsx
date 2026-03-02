@@ -73,7 +73,7 @@ export default function SpotifySection() {
     <div className="min-h-screen w-full font-mono py-20 px-4 md:px-10">
       <Header startYear={startYear} endYear={endYear} data={data} />
       <StatCards data={data} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-3 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-3 gap-6 w-full mx-auto max-w-6xl">
         <div className="row-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-lg h-129">
           <ArtistTrackButton activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "artists" ? (
@@ -83,7 +83,7 @@ export default function SpotifySection() {
               ))}
             </div>
           ) : (
-              <div className="">
+            <div className="">
               {data.topTracks.map((t, i) => (
                 <TrackRow
                   key={t.name}
@@ -98,7 +98,7 @@ export default function SpotifySection() {
           )}
         </div>
         <Charts className="hidden sm:flex row-span-2" data={data} peakHour={peakHour} />
-        <ObsessionTracker className="col-span-2 row-start-3" monthlyObsessions={data.monthlyObsessions}  />
+        <ObsessionTracker className="col-span-2 row-start-3" monthlyObsessions={data.monthlyObsessions} />
       </div>
       <MostLoyalArtist loyalArtists={data.loyalArtists} allYears={data.allYears} />
     </div>

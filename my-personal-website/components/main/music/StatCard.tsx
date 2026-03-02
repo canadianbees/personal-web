@@ -19,7 +19,7 @@ const StatCard = ({ label, value, sub }: { label: string; value: string; sub?: s
 
 const StatCards = ({ data }: { data: ProcessedData }) => {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 max-w-6xl mx-auto">
             <StatCard label="total hours" value={data.totalStats.totalHours.toLocaleString()} sub="of music" />
             <StatCard label="total streams" value={`${Math.round(data.totalStats.totalPlays / 1000)}k+`} sub="songs played" />
             <StatCard label="top artist" value={data.totalStats.topArtist} sub={`${data.topArtists[0]?.plays.toLocaleString()} plays`} />

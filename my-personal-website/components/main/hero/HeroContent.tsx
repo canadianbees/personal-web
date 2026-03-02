@@ -31,11 +31,11 @@ const HeroContent = () => {
           <MorphingText texts={["celina alzenor", "software engineer", "platypus enjoyer", "solitaire enthusiast"]} />
           <motion.div
             variants={slideInFromLeft(0.8)}
-            className="flex flex-col md:mt-15 text-lg text-gray-400 max-w-full md:max-w-150">
+            className="flex flex-col mt-10 md:mt-15 text-lg text-gray-400 max-w-full md:max-w-100">
             <AuroraText speed={5}>
               Seeking new opportunites and roles
             </AuroraText>
-            <div className="flex flex-row gap-5 justify-center">
+            <div className="flex flex-row gap-5 justify-center lg:justify-start">
               <a href="https://www.linkedin.com/in/celina-alzenor/">  <Linkedin size={25} color="#0A66C2" /> </a>
               <a href="https://github.com/canadianbees"><Github size={25} color="#FFFFFF" /></a>
             </div>
