@@ -35,6 +35,7 @@
   "devDependencies": {
     "@iconify-json/skill-icons": "^1.2.3",
     "@ljharb/tsconfig": "^0.3.2",
+    "@netlify/plugin-nextjs": "^5.15.8",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@tailwindcss/postcss": "^4",
