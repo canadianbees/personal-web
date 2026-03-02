@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const client = await auth.getClient();
     const token = await client.getAccessToken();
 
-    const gcsUrl = `https://storage.googleapis.com/storage/v1/b/${process.env.PHOTO_BUCKET}/o/${encodeURIComponent(fileName)}?alt=media`;
+    const gcsUrl = `https://storage.googleapis.com/storage/v1/b/${process.env.PHOTO_BUCKET}/o/${fileName}?alt=media`;
     const res = await fetch(gcsUrl, {
       headers: { Authorization: `Bearer ${token.token}`, cache: "no-store" },
     });
