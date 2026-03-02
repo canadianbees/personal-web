@@ -55,7 +55,7 @@ export default function PhotoGallery({ initialItems = [] }: { initialItems?: Pho
                                 className="relative break-inside-avoid cursor-pointer group rounded-xl overflow-hidden border border-white/10 bg-white/5"
                                 whileHover={{ y: -5 }}
                             >
-                                <Image
+                                <img
                                     src={item.url}
                                     alt={item.title}
                                     width={500}

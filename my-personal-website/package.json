@@ -30,6 +30,7 @@
     "react-aria-components": "^1.15.1",
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
     "tech-stack-icons": "^3.7.0"
   },
