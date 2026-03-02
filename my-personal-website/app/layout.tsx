@@ -17,20 +17,13 @@ export const metadata: Metadata = {
   title: "Celina's Website",
   description: "This is my portfolio!",
 };
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.className}  bg-[#D3A1B9] overflow-y-scroll overflow-x-hidden`}
-      >
-        <StarsCanvas/>
-        {children}
+      <body className={`${geistSans.className} bg-[#D3A1B9] overflow-y-scroll overflow-x-hidden`}>
+          <StarsCanvas/>
+          {children}
       </body>
     </html>
-  );
+  )
 }

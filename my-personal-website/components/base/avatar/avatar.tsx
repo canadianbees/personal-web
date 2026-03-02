@@ -3,7 +3,6 @@
 import { type FC, type ReactNode, useState } from "react";
 import { User01 } from "@untitledui/icons";
 import { cx } from "@/lib/utils/cx";
-import { AvatarOnlineIndicator, VerifiedTick } from "./base-components";
 
 type AvatarSize = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
@@ -96,19 +95,6 @@ export const Avatar = ({
     };
 
     const renderBadgeContent = () => {
-        if (status) {
-            return <AvatarOnlineIndicator status={status} size={size === "xxs" ? "xs" : size} />;
-        }
-
-        if (verified) {
-            return (
-                <VerifiedTick
-                    size={size === "xxs" ? "xs" : size}
-                    className={cx("absolute right-0 bottom-0", (size === "xxs" || size === "xs") && "-right-px -bottom-px")}
-                />
-            );
-        }
-
         return badge;
     };
 

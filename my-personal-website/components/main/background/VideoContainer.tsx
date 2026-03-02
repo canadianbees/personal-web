@@ -5,7 +5,7 @@ import myVideo from '../../../videos/VID_20260226_225927.MP4'
 
 const VideoContainer = () => {
     return (
-        <div className='fixed inset-0 z-[-1]'>
+        <div className='fixed inset-0 z-[-1] pointer-events-none'>
    <BackgroundVideo
             src={myVideo}
             autoPlay

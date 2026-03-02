@@ -9,11 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@cursorify/react": "^0.0.43",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@heroicons/react": "^2.2.0",
     "@heroui/avatar": "^2.2.25",
     "@mux/mux-background-video": "^0.2.0",
+    "@styled-icons/simple-icons": "^10.46.0",
     "@svgr/webpack": "^8.1.0",
     "@untitledui/icons": "^0.0.21",
     "class-variance-authority": "^0.7.1",
@@ -26,6 +28,7 @@
     "react": "19.2.3",
     "react-aria-components": "^1.15.1",
     "react-dom": "19.2.3",
+    "recharts": "^3.7.0",
     "tailwind-merge": "^3.5.0",
     "tech-stack-icons": "^3.7.0"
   },
@@ -40,7 +43,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "framer-motion": "^12.34.3",
     "react-intersection-observer": "^10.0.3",
     "shadcn": "^3.8.5",
     "tailwindcss": "^4.2.1",

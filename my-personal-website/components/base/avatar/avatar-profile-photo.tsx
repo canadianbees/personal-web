@@ -4,7 +4,6 @@ import { useState } from "react";
 import { User01 } from "@untitledui/icons";
 import { cx } from "@/lib/utils/cx";
 import { type AvatarProps } from "./avatar";
-import { AvatarOnlineIndicator, VerifiedTick } from "./base-components";
 
 const styles = {
     sm: {
@@ -98,14 +97,6 @@ export const AvatarProfilePhoto = ({
     };
 
     const renderBadgeContent = () => {
-        if (status) {
-            return <AvatarOnlineIndicator status={status} size={tickSizeMap[size]} className={styles[size].badge} />;
-        }
-
-        if (verified) {
-            return <VerifiedTick size={tickSizeMap[size]} className={cx("absolute", styles[size].badge)} />;
-        }
-
         return badge;
     };
 

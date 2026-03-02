@@ -101,11 +101,11 @@ const Texts: React.FC<Pick<MorphingTextProps, "texts">> = ({ texts }) => {
   return (
     <>
       <span
-        className="absolute inset-x-0 top-0 m-auto inline-block w-full"
+  className="absolute inset-x-0 top-0 m-auto inline-block w-full whitespace-normal"
         ref={text1Ref}
       />
       <span
-        className="absolute inset-x-0 top-0 m-auto inline-block w-full"
+  className="absolute inset-x-0 top-0 m-auto inline-block w-full whitespace-normal"
         ref={text2Ref}
       />
     </>
@@ -139,7 +139,7 @@ export const MorphingText: React.FC<MorphingTextProps> = ({
 }) => (
   <div
     className={cn(
-      "relative mx-auto h-16 w-full max-w-3xl text-yellow-300 font-sans text-[30pt] leading-none font-bold filter-[url(#threshold)_blur(0.6px)] md:h-24 md:text-[32pt] lg:text-[40pt]",
+      "relative mx-auto h-24 md:h-1 w-full max-w-3xl text-yellow-300 font-sans text-[30pt] leading-tight font-bold filter-[url(#threshold)_blur(0.6px)]  md:text-[32pt] lg:text-[40pt]",
       className
     )}
   >

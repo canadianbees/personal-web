@@ -71,9 +71,7 @@ html {
   scroll-behavior: smooth;
 } 
 
-body {
-cursor: url('/pixel-art-platypus-with-brown-fur-and-duck-bill-on-transparent-background-side-view-png.png') 16 16, auto;
-} 
+
 
 @theme inline {
   --animate-orbit: orbit calc(var(--duration)*1s) linear infinite;
@@ -277,17 +275,31 @@ cursor: url('/pixel-art-platypus-with-brown-fur-and-duck-bill-on-transparent-bac
   }
 }
 
-@theme {
-  --animate-marquee: marquee var(--duration) linear infinite;
-  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+.rainbow-border {
+  position: relative;
+  border: 1px solid  rgba(255, 255, 255, 0.1);
+  background-clip: padding-box;
 }
 
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-100% - var(--gap))); }
+.rainbow-border:hover {
+  border-color: transparent;
+  box-shadow: 
+    0 0 0 2px var(--color-1),
+    0 0 12px var(--color-1);
+  animation: rainbow-border-cycle var(--speed, 2s) infinite linear;
 }
 
-@keyframes marquee-vertical {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(calc(-100% - var(--gap))); }
+@keyframes rainbow-border-cycle {
+  0%    { box-shadow: 0 0 0 2px oklch(65% 0.28 15),   0 0 12px oklch(65% 0.28 15); }
+  9%    { box-shadow: 0 0 0 2px oklch(68% 0.24 35),   0 0 12px oklch(68% 0.24 35); }
+  18%   { box-shadow: 0 0 0 2px oklch(72% 0.22 55),   0 0 12px oklch(72% 0.22 55); }
+  27%   { box-shadow: 0 0 0 2px oklch(82% 0.2 85),    0 0 12px oklch(82% 0.2 85); }
+  36%   { box-shadow: 0 0 0 2px oklch(86% 0.22 115),  0 0 12px oklch(86% 0.22 115); }
+  45%   { box-shadow: 0 0 0 2px oklch(78% 0.2 155),   0 0 12px oklch(78% 0.2 155); }
+  54%   { box-shadow: 0 0 0 2px oklch(72% 0.18 200),  0 0 12px oklch(72% 0.18 200); }
+  63%   { box-shadow: 0 0 0 2px oklch(65% 0.2 240),   0 0 12px oklch(65% 0.2 240); }
+  72%   { box-shadow: 0 0 0 2px oklch(60% 0.26 275),  0 0 12px oklch(60% 0.26 275); }
+  81%   { box-shadow: 0 0 0 2px oklch(62% 0.28 305),  0 0 12px oklch(62% 0.28 305); }
+  90%   { box-shadow: 0 0 0 2px oklch(65% 0.27 340),  0 0 12px oklch(65% 0.27 340); }
+  100%  { box-shadow: 0 0 0 2px oklch(65% 0.28 15),   0 0 12px oklch(65% 0.28 15); }
 }
