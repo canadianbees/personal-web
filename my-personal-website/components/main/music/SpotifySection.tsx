@@ -74,7 +74,7 @@ export default function SpotifySection() {
       <Header startYear={startYear} endYear={endYear} data={data} />
       <StatCards data={data} />
       <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-3 gap-6 max-w-6xl mx-auto">
-        <div className="row-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-lg w-99.5 h-129">
+        <div className="row-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-lg h-129">
           <ArtistTrackButton activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "artists" ? (
             <div className=" gap-3">
