@@ -41,7 +41,7 @@ create table if not exists guests (
 -- full_url    → GCS object path, NOT a public URL (served via token-gated API)
 -- preview_url → video only: 6-second muted loop for the mosaic tile
 create table if not exists uploads (
-                                       id          uuid        not null default gen_random_uuid() primary key,
+    id          uuid        not null primary key,
     event_id    uuid        not null references events(id) on delete cascade,
     media_type  text        not null check (media_type in ('image', 'video')),
     thumb_url   text,

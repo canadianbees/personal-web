@@ -2,11 +2,6 @@ MAGIC_BYTES = {
     'image': [
         b'\xff\xd8\xff',          # JPEG
         b'\x89PNG\r\n\x1a\n',    # PNG
-    ],
-    'video': [
-        b'\x00\x00\x00\x18ftyp', # MP4
-        b'\x00\x00\x00\x20ftyp', # MP4 variant
-        b'\x00\x00\x00\x1cftyp', # MOV
     ]
 }
 
@@ -16,9 +11,8 @@ def validate_file_type(raw: bytes, content_type:str) -> bool:
     match kind:
 
         case "video":
-            for signature in MAGIC_BYTES['video']:
-                if raw.startswith(signature):
-                    return True
+            if raw[4:8] == b'ftyp':
+                return True
             return False
 
         case "image":

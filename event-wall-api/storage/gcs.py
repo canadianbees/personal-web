@@ -8,7 +8,7 @@ STORAGE_CLIENT = storage.Client()
 EVENTS_BUCKET = os.getenv("GCS_EVENT_BUCKET")
 ASSETS_BUCKET = os.getenv("GCS_ASSETS_BUCKET")
 
-def upload_to_gcs(data: bytes, slug: str, prefix:str, upload_id: str, to_events=True):
+async def upload_to_gcs(data: bytes, slug: str, prefix:str, upload_id: str, to_events=True):
    """Uploads a file to the bucket."""
 
    dest_path = os.path.join(slug, prefix, upload_id)
