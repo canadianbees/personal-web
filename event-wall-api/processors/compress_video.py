@@ -1,4 +1,7 @@
-import tempfile, subprocess, os
+import asyncio
+import tempfile
+import subprocess
+import os
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -11,11 +14,15 @@ async def compress_video(raw: bytes) -> tuple[bytes, bytes, bytes]:
         input_file = Path(tmpdir) / "input.mp4"
         input_file.write_bytes(raw)
 
-        # TODO: run in executor to avoid blocking the event loop
-        result = subprocess.run(
-            [BINARY, str(input_file), tmpdir],
-            capture_output=True, timeout=120
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            lambda: subprocess.run(
+                [BINARY, str(input_file), tmpdir],
+                capture_output=True, timeout=120
+            )
         )
+
         if result.returncode != 0:
             raise RuntimeError(result.stderr.decode())
 

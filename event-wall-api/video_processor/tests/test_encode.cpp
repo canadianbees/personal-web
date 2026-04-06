@@ -210,6 +210,164 @@ TEST_F(EncodeTests, PreviewIsValidVideo) {
 
 // ── encode_output (output dimensions) ────────────────────────────────────────
 
+// ── open_output_file ──────────────────────────────────────────────────────────
+
+// should return a valid output context and create the file on disk
+TEST_F(EncodeTests, OpenOutputFileCreatesValidContext) {
+    AVCodecContext* enc_ctx = open_encoder(480, 270, 32);
+    ASSERT_NE(enc_ctx, nullptr);
+
+    std::string out_path = "/tmp/test_open_output_file.mp4";
+    AVFormatContext* out_ctx = open_output_file(out_path, enc_ctx);
+
+    ASSERT_NE(out_ctx, nullptr) << "Expected a valid output context";
+    EXPECT_TRUE(std::filesystem::exists(out_path));
+
+    avio_closep(&out_ctx->pb);
+    avformat_free_context(out_ctx);
+    avcodec_free_context(&enc_ctx);
+}
+
+// should return nullptr when the output directory does not exist
+TEST_F(EncodeTests, OpenOutputFileInvalidPathReturnsNull) {
+    AVCodecContext* enc_ctx = open_encoder(480, 270, 32);
+    ASSERT_NE(enc_ctx, nullptr);
+
+    AVFormatContext* out_ctx = open_output_file("/nonexistent/dir/test.mp4", enc_ctx);
+
+    EXPECT_EQ(out_ctx, nullptr);
+
+    avcodec_free_context(&enc_ctx);
+}
+
+// output context should contain exactly one stream (the video stream we added)
+TEST_F(EncodeTests, OpenOutputFileHasOneVideoStream) {
+    AVCodecContext* enc_ctx = open_encoder(480, 270, 32);
+    ASSERT_NE(enc_ctx, nullptr);
+
+    std::string out_path = "/tmp/test_open_output_streams.mp4";
+    AVFormatContext* out_ctx = open_output_file(out_path, enc_ctx);
+    ASSERT_NE(out_ctx, nullptr);
+
+    EXPECT_EQ(out_ctx->nb_streams, 1u) << "Expected exactly one video stream";
+
+    avio_closep(&out_ctx->pb);
+    avformat_free_context(out_ctx);
+    avcodec_free_context(&enc_ctx);
+}
+
+// ── flush_encoder ─────────────────────────────────────────────────────────────
+
+// flushing with no queued frames should not crash
+TEST_F(EncodeTests, FlushEncoderEmptyEncoderDoesNotCrash) {
+    AVCodecContext* enc_ctx = open_encoder(480, 270, 32);
+    ASSERT_NE(enc_ctx, nullptr);
+
+    std::string out_path = "/tmp/test_flush_empty.mp4";
+    AVFormatContext* out_ctx = open_output_file(out_path, enc_ctx);
+    ASSERT_NE(out_ctx, nullptr);
+
+    AVPacket* pkt = av_packet_alloc();
+    flush_encoder(enc_ctx, out_ctx, pkt);
+    av_write_trailer(out_ctx);
+
+    av_packet_free(&pkt);
+    avio_closep(&out_ctx->pb);
+    avformat_free_context(out_ctx);
+    avcodec_free_context(&enc_ctx);
+
+    SUCCEED();
+}
+
+// flushing after queuing a frame should drain remaining packets without crash
+TEST_F(EncodeTests, FlushEncoderAfterFrameCompletes) {
+    AVCodecContext* enc_ctx = open_encoder(480, 270, 32);
+    ASSERT_NE(enc_ctx, nullptr);
+
+    std::string out_path = "/tmp/test_flush_after_frame.mp4";
+    AVFormatContext* out_ctx = open_output_file(out_path, enc_ctx);
+    ASSERT_NE(out_ctx, nullptr);
+
+    // queue one synthetic frame so the encoder has something buffered
+    AVFrame* frame = av_frame_alloc();
+    frame->width  = 480;
+    frame->height = 270;
+    frame->format = AV_PIX_FMT_YUV420P;
+    frame->pts    = 0;
+    av_frame_get_buffer(frame, 0);
+    avcodec_send_frame(enc_ctx, frame);
+    av_frame_free(&frame);
+
+    // drain any immediately available packets
+    AVPacket* pkt = av_packet_alloc();
+    while (avcodec_receive_packet(enc_ctx, pkt) >= 0) {
+        pkt->stream_index = 0;
+        av_interleaved_write_frame(out_ctx, pkt);
+        av_packet_unref(pkt);
+    }
+
+    // flush the rest
+    flush_encoder(enc_ctx, out_ctx, pkt);
+    av_write_trailer(out_ctx);
+
+    av_packet_free(&pkt);
+    avio_closep(&out_ctx->pb);
+    avformat_free_context(out_ctx);
+    avcodec_free_context(&enc_ctx);
+
+    SUCCEED();
+}
+
+// ── encode_output (error paths) ───────────────────────────────────────────────
+
+// encode_output with a non-writable output path should return early without crash
+TEST_F(EncodeTests, EncodeOutputInvalidOutputPathDoesNotCrash) {
+    encode_output(format_ctx, video_idx, "/nonexistent/dir/output.mp4", 26, 1280, -1, true);
+    SUCCEED();
+}
+
+// encode_output with video_idx=-1 should return early without crash
+TEST_F(EncodeTests, EncodeOutputInvalidVideoIdxDoesNotCrash) {
+    encode_output(format_ctx, -1, "/tmp/test_invalid_video_idx.mp4", 26, 1280, -1, true);
+    SUCCEED();
+}
+
+// ── encode_output (audio) ────────────────────────────────────────────────────
+
+// full encode with audio=true should produce an audio stream in the output
+TEST_F(EncodeTests, EncodeOutputWithAudioHasAudioStream) {
+    std::string out_path = "/tmp/test_with_audio.mp4";
+
+    encode_output(format_ctx, video_idx, out_path, 26, 1280, -1, true);
+
+    AVFormatContext* out_ctx = nullptr;
+    avformat_open_input(&out_ctx, out_path.c_str(), nullptr, nullptr);
+    avformat_find_stream_info(out_ctx, nullptr);
+
+    int audio_idx = av_find_best_stream(out_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
+    EXPECT_GE(audio_idx, 0) << "Output file should contain an audio stream";
+
+    avformat_close_input(&out_ctx);
+}
+
+// encode with audio=false should produce no audio stream
+TEST_F(EncodeTests, EncodeOutputWithoutAudioHasNoAudioStream) {
+    std::string out_path = "/tmp/test_without_audio.mp4";
+
+    encode_output(format_ctx, video_idx, out_path, 32, 480, 6, false);
+
+    AVFormatContext* out_ctx = nullptr;
+    avformat_open_input(&out_ctx, out_path.c_str(), nullptr, nullptr);
+    avformat_find_stream_info(out_ctx, nullptr);
+
+    int audio_idx = av_find_best_stream(out_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
+    EXPECT_LT(audio_idx, 0) << "Preview output should have no audio stream";
+
+    avformat_close_input(&out_ctx);
+}
+
+// ── encode_output (output dimensions) ────────────────────────────────────────
+
 // output video should have the correct width
 TEST_F(EncodeTests, EncodeOutputCorrectWidth) {
     std::string out_path = "/tmp/test_width.mp4";

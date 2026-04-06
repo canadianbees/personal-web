@@ -7,10 +7,14 @@ from fastapi import FastAPI, UploadFile, BackgroundTasks, HTTPException, Header,
 from processors import compress_image, compress_video
 from storage.gcs import upload_to_gcs
 from db.db import record_upload, record_conversion
+from monitoring.metrics import (
+    record_upload_success, record_upload_failure,
+    record_processing_latency, record_compression, timed
+)
 
 app = FastAPI()
 
-API_SECRET = os.environ["API_SECRET"]  #TODO: set in Cloud Run env vars
+API_SECRET = os.getenv("API_SECRET")  #TODO: set in Cloud Run env vars
 MAX_UPLOAD_BYTES = 200 * 1024 * 1024  # 200MB
 
 
@@ -27,10 +31,10 @@ async def ingest(
         bg: BackgroundTasks
 ):
 
+    queued = 0
     for file in files:
         if file.size and file.size > MAX_UPLOAD_BYTES:
-            print(413, "File too large. Max 200MB. Skipping file")
-            continue
+            raise HTTPException(413, "File too large. Max 200MB.")
 
         raw = await file.read(MAX_UPLOAD_BYTES + 1)
 
@@ -38,33 +42,49 @@ async def ingest(
             raise HTTPException(413, "File too large. Max 200MB.")
 
         bg.add_task(process_and_store, raw, file.content_type, event_slug, event_id)
-    return { "queued": len(files) }
+        queued += 1
+    return { "queued": queued }
 
 async def process_and_store(raw: bytes, content_type: str, slug: str, event_id: str):
 
     upload_id = str(uuid.uuid4())
     asset_name = generate_asset(slug)
+    media_type = "video" if "video" in content_type else "image"
 
-    if "video" in content_type:
-        # calls C++ binary
-        full, preview, thumb = await compress_video(raw)
-        reduct, before_kb, after_kb = calculate_reduction(raw, full)
-        await record_conversion(upload_id=upload_id, asset_name=asset_name , source="compress_video" , before_kb=before_kb, after_kb=after_kb, reduction_pct=reduct, codec="H264"  )
+    try:
+        if media_type == "video":
+            with timed("video") as t:
+                full, preview, thumb = await compress_video(raw)
+            record_processing_latency("video", t["ms"])
 
-        ok = await handle_upload(event_id=event_id, full=full, thumb=thumb,slug=slug,upload_id=upload_id, for_video=True, preview=preview)
+            reduct, before_kb, after_kb = calculate_reduction(raw, full)
+            record_compression("H264", before_kb, after_kb, reduct)
 
-        if not ok:
-            raise HTTPException(413, "[process_and_store] error uploading video")
+            ok = await handle_upload(event_id=event_id, full=full, thumb=thumb, slug=slug, upload_id=upload_id, for_video=True, preview=preview)
+            if not ok:
+                raise HTTPException(500, "[process_and_store] error uploading video")
 
-    else:
-        full, thumb = await compress_image(raw)
-        reduct, before_kb, after_kb = calculate_reduction(raw, full)
-        await record_conversion(upload_id=upload_id, asset_name=asset_name , source="compress_image" , before_kb=before_kb, after_kb=after_kb, reduction_pct=reduct, codec="WEBP"  )
+            await record_conversion(upload_id=upload_id, asset_name=asset_name, source="compress_video", before_kb=before_kb, after_kb=after_kb, reduction_pct=reduct, codec="H264")
 
-        ok = await handle_upload(event_id=event_id, full=full, thumb=thumb,slug=slug,upload_id=upload_id)
+        else:
+            with timed("image") as t:
+                full, thumb = await compress_image(raw)
+            record_processing_latency("image", t["ms"])
 
-        if not ok:
-            raise HTTPException(413, "[process_and_store] error uploading image")
+            reduct, before_kb, after_kb = calculate_reduction(raw, full)
+            record_compression("WEBP", before_kb, after_kb, reduct)
+
+            ok = await handle_upload(event_id=event_id, full=full, thumb=thumb, slug=slug, upload_id=upload_id)
+            if not ok:
+                raise HTTPException(500, "[process_and_store] error uploading image")
+
+            await record_conversion(upload_id=upload_id, asset_name=asset_name, source="compress_image", before_kb=before_kb, after_kb=after_kb, reduction_pct=reduct, codec="WEBP")
+
+        record_upload_success(media_type)
+
+    except Exception as e:
+        record_upload_failure(media_type)
+        raise
 
 
 def get_kb(raw: bytes) -> float:
@@ -83,18 +103,16 @@ def calculate_reduction(raw: bytes, transformed:bytes) -> tuple[float, float, fl
 
     return 100 - determinant, before_kb, after_kb
 
-async def handle_upload(event_id: str,full: bytes, thumb: bytes, slug: str, upload_id: str, for_video: bool = True,  preview: bytes = None):
+async def handle_upload(event_id: str, full: bytes, thumb: bytes, slug: str, upload_id: str, for_video: bool = True, preview: bytes = None):
 
     if for_video:
-        full_url    = await upload_to_gcs(full,    slug, upload_id=upload_id, prefix="full")
-        thumb_url   = await upload_to_gcs(thumb,   slug, upload_id=upload_id, prefix="thumbs")
-        preview_url = await upload_to_gcs(preview, slug, upload_id=upload_id, prefix="preview")
+        full_url    = await upload_to_gcs(full,    slug, upload_id=upload_id, prefix="full",    content_type="video/mp4")
+        thumb_url   = await upload_to_gcs(thumb,   slug, upload_id=upload_id, prefix="thumbs",  content_type="image/webp")
+        preview_url = await upload_to_gcs(preview, slug, upload_id=upload_id, prefix="preview", content_type="video/mp4")
 
-        return await record_upload(upload_id=upload_id,event_id=event_id, full_url=full_url, thumb_url=thumb_url, preview_url=preview_url, media_type="video")
+        return await record_upload(upload_id=upload_id, event_id=event_id, full_url=full_url, thumb_url=thumb_url, preview_url=preview_url, media_type="video")
 
+    full_url  = await upload_to_gcs(full,  slug, upload_id=upload_id, prefix="full",   content_type="image/webp")
+    thumb_url = await upload_to_gcs(thumb, slug, upload_id=upload_id, prefix="thumbs", content_type="image/webp")
 
-    full_url    = await upload_to_gcs(full,    slug, upload_id=upload_id, prefix="full")
-    thumb_url   = await upload_to_gcs(thumb,   slug, upload_id=upload_id, prefix="thumbs")
-
-    return await record_upload(upload_id=upload_id,event_id=event_id, full_url=full_url, thumb_url=thumb_url, media_type="image")
-
+    return await record_upload(upload_id=upload_id, event_id=event_id, full_url=full_url, thumb_url=thumb_url, media_type="image")

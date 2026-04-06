@@ -26,10 +26,17 @@ int main(const int argc, char* argv[]) {
     AVFormatContext* format_ctx = nullptr;
     fprintf(stderr, "Opening input file: %s\n", input);
 
-    avformat_open_input(&format_ctx, input, nullptr, nullptr);
+    if (avformat_open_input(&format_ctx, input, nullptr, nullptr) < 0) {
+        fprintf(stderr, "Error: could not open input file: %s\n", input);
+        return 1;
+    }
 
     fprintf(stderr, "Finding stream info\n");
-    avformat_find_stream_info(format_ctx, nullptr);
+    if (avformat_find_stream_info(format_ctx, nullptr) < 0) {
+        fprintf(stderr, "Error: could not read stream info\n");
+        avformat_close_input(&format_ctx);
+        return 1;
+    }
 
     fprintf(stderr, "Finding streams\n");
 
@@ -44,13 +51,36 @@ int main(const int argc, char* argv[]) {
 
     fprintf(stderr, "Starting encode_output preview\n");
 
+    // open a fresh context for preview — av_read_frame exhausted the cursor during full encode
+    AVFormatContext* preview_ctx = nullptr;
+    if (avformat_open_input(&preview_ctx, input, nullptr, nullptr) < 0) {
+        fprintf(stderr, "Error: could not open input for preview\n");
+        avformat_close_input(&format_ctx);
+        return 1;
+    }
+    avformat_find_stream_info(preview_ctx, nullptr);
+    int preview_video_idx = av_find_best_stream(preview_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
+
     // first 6 seconds, no audio, scale = 480:-2, crf=32
-    encode_output(format_ctx, video_idx, outdir + std::string("/preview.mp4"), /*crf=*/32, /*max_w=*/480, /*duration_s=*/6, /*audio=*/false);
+    encode_output(preview_ctx, preview_video_idx, outdir + std::string("/preview.mp4"), /*crf=*/32, /*max_w=*/480, /*duration_s=*/6, /*audio=*/false);
+    avformat_close_input(&preview_ctx);
 
     fprintf(stderr, "Starting extract_best_frame\n");
 
+    // open a fresh context for frame extraction
+    AVFormatContext* frame_ctx = nullptr;
+    if (avformat_open_input(&frame_ctx, input, nullptr, nullptr) < 0) {
+        fprintf(stderr, "Error: could not open input for frame extraction\n");
+        avformat_close_input(&format_ctx);
+        return 1;
+    }
+    avformat_find_stream_info(frame_ctx, nullptr);
+    int frame_video_idx = av_find_best_stream(frame_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
+    int frame_audio_idx = av_find_best_stream(frame_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
+
     // poster frame
-    extract_best_frame(format_ctx, video_idx, audio_idx, outdir + std::string("/thumb.webp"), 480);
+    extract_best_frame(frame_ctx, frame_video_idx, frame_audio_idx, outdir, 480);
+    avformat_close_input(&frame_ctx);
 
     fprintf(stderr, "Done\n");
 

@@ -2,9 +2,9 @@
 extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
-
+#include <libswscale/swscale.h>
 }
-#include <opencv4/opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <string>
 #include <vector>

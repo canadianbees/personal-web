@@ -67,11 +67,25 @@ AudioTimeline build_audio_timeline(AVFormatContext *format_ctx, int audio_idx) {
         avcodec_send_packet(codec_ctx, packet);
 
         while (avcodec_receive_frame(codec_ctx, frame) >= 0) {
-            const auto* samples = reinterpret_cast<float *>(frame->data[0]);
-
-            // for each sample in the frame, square the value
             for (int i = 0; i < frame->nb_samples; ++i) {
-                rms_acc += samples[i] * samples[i];
+                float s = 0.0f;
+                switch (codec_ctx->sample_fmt) {
+                    case AV_SAMPLE_FMT_FLTP:
+                        s = reinterpret_cast<float*>(frame->data[0])[i];
+                        break;
+                    case AV_SAMPLE_FMT_FLT:
+                        s = reinterpret_cast<float*>(frame->data[0])[i * codec_ctx->ch_layout.nb_channels];
+                        break;
+                    case AV_SAMPLE_FMT_S16P:
+                        s = reinterpret_cast<int16_t*>(frame->data[0])[i] / 32768.0f;
+                        break;
+                    case AV_SAMPLE_FMT_S16:
+                        s = reinterpret_cast<int16_t*>(frame->data[0])[i * codec_ctx->ch_layout.nb_channels] / 32768.0f;
+                        break;
+                    default:
+                        break;
+                }
+                rms_acc += s * s;
                 sample_count++;
             }
         }
@@ -125,13 +139,29 @@ float mean_brightness(const AVFrame* frame) {
 }
 
 void save_frame_as_webp(const AVFrame *frame, const std::string &outdir, int max_w) {
-    cv::Mat frame_mat(frame->height, frame->width, CV_8UC1, frame->data[0], frame->linesize[0]);
+    // Convert from decoder pixel format (typically YUV) to BGR24 for OpenCV
+    SwsContext* sws = sws_getContext(
+        frame->width, frame->height, static_cast<AVPixelFormat>(frame->format),
+        frame->width, frame->height, AV_PIX_FMT_BGR24,
+        SWS_BILINEAR, nullptr, nullptr, nullptr
+    );
+    if (!sws) return;
+
+    AVFrame* bgr = av_frame_alloc();
+    bgr->width  = frame->width;
+    bgr->height = frame->height;
+    bgr->format = AV_PIX_FMT_BGR24;
+    av_frame_get_buffer(bgr, 0);
+
+    sws_scale(sws, frame->data, frame->linesize, 0, frame->height, bgr->data, bgr->linesize);
+    sws_freeContext(sws);
+
     const int new_h = frame->height * max_w / frame->width;
-
+    cv::Mat frame_mat(bgr->height, bgr->width, CV_8UC3, bgr->data[0], bgr->linesize[0]);
     cv::resize(frame_mat, frame_mat, cv::Size(max_w, new_h));
+    cv::imwrite(outdir + "/thumb.webp", frame_mat);
 
-    cv::imwrite(outdir+ "/thumb.webp", frame_mat);
-
+    av_frame_free(&bgr);
 }
 
 AVFrame* decode_frame_at(AVFormatContext *format_ctx, int video_idx, double timestamp) {
@@ -222,9 +252,7 @@ void extract_best_frame(AVFormatContext *format_ctx, int video_idx, int audio_id
     const auto audio_timeline = build_audio_timeline(format_ctx, audio_idx);
 
     FrameCandidate best{};
-    best.brightness = 0;
-    best.sharpness = 0;
-    best.audio_rms = 0;
+    bool found = false;
 
     // sample every half second, give each frame a score
     for (double seek = 0.5; seek < duration - 0.5; seek += 0.5 ) {
@@ -241,14 +269,20 @@ void extract_best_frame(AVFormatContext *format_ctx, int video_idx, int audio_id
         candidate.brightness = mean_brightness(frame);
         candidate.sharpness = get_sharpness(frame);
 
-        if (candidate.score() > best.score()) {
+        if (!found || candidate.score() > best.score()) {
             best = candidate;
+            found = true;
 
-            //save frame to desk immediately, overwrite if better is found
+            //save frame to disk immediately, overwrite if better is found
             save_frame_as_webp(frame, outdir, max_w);
         }
 
         av_frame_free(&frame);
+    }
+
+    // fallback: no frame decoded in loop (e.g. very short gap), use midpoint
+    if (!found) {
+        extract_frame_at(format_ctx, video_idx, outdir, duration / 2.0, max_w);
     }
 
 }

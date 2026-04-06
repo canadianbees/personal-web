@@ -274,3 +274,182 @@ TEST_F(FrameTests, BetterFrameScoresHigher) {
 
     EXPECT_GT(good.score(), bad.score());
 }
+
+// brightness exactly at the threshold (30.0) clamps bright_factor to 0 → score must be 0
+TEST_F(FrameTests, ScoreAtExactBrightnessThresholdIsZero) {
+    FrameCandidate c{};
+    c.brightness = 30.0f;
+    c.sharpness  = 500.0f;
+    c.audio_rms  = 1.0f;
+
+    EXPECT_EQ(c.score(), 0.0f);
+}
+
+// zero audio_rms multiplies the whole product to 0
+TEST_F(FrameTests, ScoreZeroAudioRmsIsZero) {
+    FrameCandidate c{};
+    c.brightness = 200.0f;
+    c.sharpness  = 400.0f;
+    c.audio_rms  = 0.0f;
+
+    EXPECT_EQ(c.score(), 0.0f);
+}
+
+// zero sharpness makes sharp_factor 0 → score must be 0
+TEST_F(FrameTests, ScoreZeroSharpnessIsZero) {
+    FrameCandidate c{};
+    c.brightness = 200.0f;
+    c.sharpness  = 0.0f;
+    c.audio_rms  = 1.0f;
+
+    EXPECT_EQ(c.score(), 0.0f);
+}
+
+// sharpness above 500 should be capped — score must equal the score at exactly 500
+TEST_F(FrameTests, ScoreHighSharpnessCappedAtMax) {
+    FrameCandidate at_cap{};
+    at_cap.brightness = 200.0f;
+    at_cap.sharpness  = 500.0f;
+    at_cap.audio_rms  = 1.0f;
+
+    FrameCandidate above_cap{};
+    above_cap.brightness = 200.0f;
+    above_cap.sharpness  = 1000.0f;
+    above_cap.audio_rms  = 1.0f;
+
+    EXPECT_EQ(at_cap.score(), above_cap.score())
+        << "Sharpness is capped at 500 — going higher must not increase the score";
+}
+
+// ── save_frame_as_webp ────────────────────────────────────────────────────────
+
+// should create thumb.webp in the output directory
+TEST_F(FrameTests, SaveFrameAsWebpCreatesFile) {
+    AVFrame* frame = av_frame_alloc();
+    frame->width  = 640;
+    frame->height = 480;
+    frame->format = AV_PIX_FMT_GRAY8;
+    av_frame_get_buffer(frame, 0);
+    memset(frame->data[0], 128, frame->linesize[0] * frame->height);
+
+    std::string outdir = "/tmp/test_save_webp";
+    std::filesystem::create_directories(outdir);
+    save_frame_as_webp(frame, outdir, 320);
+
+    EXPECT_TRUE(std::filesystem::exists(outdir + "/thumb.webp"));
+    EXPECT_GT(std::filesystem::file_size(outdir + "/thumb.webp"), 0u);
+
+    av_frame_free(&frame);
+}
+
+// output WebP should be readable by OpenCV and have the correct width
+TEST_F(FrameTests, SaveFrameAsWebpCorrectDimensions) {
+    AVFrame* frame = av_frame_alloc();
+    frame->width  = 640;
+    frame->height = 480;
+    frame->format = AV_PIX_FMT_GRAY8;
+    av_frame_get_buffer(frame, 0);
+    // checkerboard so the image has non-trivial content
+    for (int r = 0; r < frame->height; r++)
+        for (int c = 0; c < frame->width; c++)
+            frame->data[0][r * frame->linesize[0] + c] = ((r / 8 + c / 8) % 2) ? 255 : 0;
+
+    std::string outdir = "/tmp/test_save_webp_dims";
+    std::filesystem::create_directories(outdir);
+    save_frame_as_webp(frame, outdir, 320);
+
+    cv::Mat loaded = cv::imread(outdir + "/thumb.webp");
+    ASSERT_FALSE(loaded.empty()) << "Output WebP should be readable";
+    EXPECT_EQ(loaded.cols, 320) << "Output width should match max_w";
+
+    av_frame_free(&frame);
+}
+
+// ── extract_frame_at ──────────────────────────────────────────────────────────
+
+// should produce thumb.webp when given a valid timestamp
+TEST_F(FrameTests, ExtractFrameAtProducesWebp) {
+    std::string outdir = "/tmp/test_extract_frame_at";
+    std::filesystem::create_directories(outdir);
+
+    extract_frame_at(format_ctx, video_idx, outdir, 1.0, 320);
+
+    EXPECT_TRUE(std::filesystem::exists(outdir + "/thumb.webp"));
+}
+
+// should return cleanly (no crash, no file) when decode_frame_at returns nullptr
+TEST_F(FrameTests, ExtractFrameAtInvalidStreamDoesNotCrash) {
+    std::string outdir = "/tmp/test_extract_frame_at_invalid";
+    std::filesystem::create_directories(outdir);
+
+    extract_frame_at(format_ctx, -1, outdir, 1.0, 320);
+
+    SUCCEED(); // no crash is the requirement; file may or may not exist
+}
+
+// ── get_sharpness (complete coverage) ────────────────────────────────────────
+
+// a frame with high-frequency edges should score higher than a uniform frame
+TEST_F(FrameTests, SharpnessCheckerboardHigherThanUniform) {
+    AVFrame* sharp = av_frame_alloc();
+    sharp->width  = 640;
+    sharp->height = 480;
+    sharp->format = AV_PIX_FMT_GRAY8;
+    av_frame_get_buffer(sharp, 0);
+    for (int r = 0; r < sharp->height; r++)
+        for (int c = 0; c < sharp->width; c++)
+            sharp->data[0][r * sharp->linesize[0] + c] = ((r + c) % 2) ? 255 : 0;
+
+    AVFrame* flat = av_frame_alloc();
+    flat->width  = 640;
+    flat->height = 480;
+    flat->format = AV_PIX_FMT_GRAY8;
+    av_frame_get_buffer(flat, 0);
+    memset(flat->data[0], 128, flat->linesize[0] * flat->height);
+
+    EXPECT_GT(get_sharpness(sharp), get_sharpness(flat));
+
+    av_frame_free(&sharp);
+    av_frame_free(&flat);
+}
+
+// ── rms_at (boundary coverage) ───────────────────────────────────────────────
+
+// timestamp exactly at the start of the first window should match that entry
+TEST_F(FrameTests, RmsAtExactWindowStartReturnsEntry) {
+    AudioTimeline tl;
+    tl.entries.emplace_back(0.0, 0.5f);
+    tl.entries.emplace_back(0.5, 0.3f);
+
+    EXPECT_EQ(rms_at(tl, 0.0), 0.5f);
+}
+
+// timestamp that falls before every entry should return back() as fallback
+TEST_F(FrameTests, RmsAtBeforeFirstEntryReturnsFallback) {
+    AudioTimeline tl;
+    tl.entries.emplace_back(1.0, 0.7f);
+    tl.entries.emplace_back(1.5, 0.4f);
+
+    // 0.0 is before the first window (1.0), so the loop finds nothing and returns back()
+    EXPECT_EQ(rms_at(tl, 0.0), tl.entries.back().second);
+}
+
+// ── build_audio_timeline (negative idx fast path) ────────────────────────────
+
+// passing audio_idx=-1 directly should hit the early-return and give an empty timeline
+TEST_F(FrameTests, AudioTimelineNegativeIdxReturnsEmpty) {
+    AudioTimeline tl = build_audio_timeline(format_ctx, -1);
+    EXPECT_EQ(tl.entries.size(), 0u);
+}
+
+// ── extract_best_frame (no-audio path) ───────────────────────────────────────
+
+// extract_best_frame with audio_idx=-1 should still produce a thumb using visual scoring
+TEST_F(FrameTests, ExtractBestFrameNoAudioProducesFile) {
+    std::string outdir = "/tmp/test_best_frame_no_audio";
+    std::filesystem::create_directories(outdir);
+
+    extract_best_frame(format_ctx, video_idx, -1, outdir, 480);
+
+    EXPECT_TRUE(std::filesystem::exists(outdir + "/thumb.webp"));
+}
