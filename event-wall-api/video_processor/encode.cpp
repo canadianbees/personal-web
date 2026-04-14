@@ -16,6 +16,7 @@ AVCodecContext* open_decoder(const AVFormatContext *format_ctx, const int stream
         avcodec_free_context(&ctx);
         return nullptr;
     }
+    ctx->thread_count = 0;  // use all available cores for decoding too
     if (avcodec_open2(ctx, codec, nullptr) < 0) {
         avcodec_free_context(&ctx);
         return nullptr;
@@ -34,8 +35,10 @@ AVCodecContext* open_encoder(const int width, const int height, const int crf) {
     ctx->width     = width;
     ctx->height    = height;
     ctx->pix_fmt   = AV_PIX_FMT_YUV420P;
-    ctx->time_base = (AVRational){1, 60};
+    ctx->time_base    = (AVRational){1, 60};
+    ctx->thread_count = 0;  // 0 = auto, use all available CPU cores
     av_opt_set_int(ctx, "crf", crf, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set(ctx, "preset", "ultrafast", AV_OPT_SEARCH_CHILDREN);
     if (avcodec_open2(ctx, codec, nullptr) < 0) {
         avcodec_free_context(&ctx);
         return nullptr;

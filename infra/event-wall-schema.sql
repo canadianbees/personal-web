@@ -45,7 +45,7 @@ create table if not exists uploads (
     event_id    uuid        not null references events(id) on delete cascade,
     media_type  text        not null check (media_type in ('image', 'video')),
     thumb_url   text,
-    full_url    text        not null,
+    full_url    text,
     preview_url text,                  -- video only
     width       integer,
     height      integer,
@@ -54,7 +54,23 @@ create table if not exists uploads (
     );
 
 
--- ── 4. COMMENTS ─────────────────────────────────────────────
+-- ── 4. PROCESSING_JOBS ──────────────────────────────────────
+-- Tracks the lifecycle of each upload through the processing pipeline.
+-- Inserted at the start of processing; updated to 'done' or 'failed' on completion.
+-- Frontend subscribes via Supabase Realtime to surface live status to the uploader.
+-- status: 'processing' → 'done' | 'failed'
+create table if not exists processing_jobs (
+    id          uuid        not null primary key,   -- same as upload_id
+    event_id    uuid        not null references events(id) on delete cascade,
+    status      text        not null default 'processing'
+                                check (status in ('processing', 'done', 'failed')),
+    error       text,                               -- null unless status = 'failed'
+    created_at  timestamptz not null default now(),
+    updated_at  timestamptz not null default now()
+    );
+
+
+-- ── 5. COMMENTS ─────────────────────────────────────────────
 -- Per-tile comment threads. Scoped to a single upload.
 -- author is optional — defaults to 'anonymous' in the UI.
 create table if not exists comments (
@@ -104,12 +120,16 @@ create index if not exists idx_guests_event_id
 create index if not exists idx_asset_conversions_upload_id
     on asset_conversions(upload_id);
 
+create index if not exists idx_processing_jobs_event_id
+    on processing_jobs(event_id);
+
 
 -- ── REALTIME ────────────────────────────────────────────────
 -- Enables Supabase Realtime push for live mosaic wall updates
 -- and per-tile comment threads.
 alter publication supabase_realtime add table uploads;
 alter publication supabase_realtime add table comments;
+alter publication supabase_realtime add table processing_jobs;
 
 
 -- ── ROW LEVEL SECURITY ──────────────────────────────────────
@@ -120,16 +140,27 @@ alter publication supabase_realtime add table comments;
 --   public insert = comments only (open annotation)
 --   everything else = service role only (FastAPI uses SUPABASE_SERVICE_KEY)
 
-alter table events           enable row level security;
-alter table guests           enable row level security;
-alter table uploads          enable row level security;
-alter table comments         enable row level security;
+alter table events            enable row level security;
+alter table guests            enable row level security;
+alter table uploads           enable row level security;
+alter table comments          enable row level security;
 alter table asset_conversions enable row level security;
+alter table processing_jobs   enable row level security;
 
 -- events: public read, no direct client insert/update
 create policy "events: public read"
   on events for select
                            using (true);
+
+-- events: authenticated insert (admin page creates events via browser client)
+create policy "events: auth insert"
+  on events for insert
+  with check (auth.role() = 'authenticated');
+
+-- events: authenticated delete (cascades to uploads, comments, processing_jobs)
+create policy "events: auth delete"
+  on events for delete
+  using (auth.role() = 'authenticated');
 
 -- guests: no anon access at all (phone numbers — service role only)
 -- (no policies = deny all for anon key)
@@ -138,6 +169,11 @@ create policy "events: public read"
 create policy "uploads: public read"
   on uploads for select
                             using (true);
+
+-- uploads: authenticated delete (admin media management; GCS cleanup handled server-side)
+create policy "uploads: auth delete"
+  on uploads for delete
+  using (auth.role() = 'authenticated');
 
 -- comments: public read + insert (open annotation, 200-char limit enforced above)
 create policy "comments: public read"
@@ -152,6 +188,11 @@ create policy "comments: public insert"
 create policy "asset_conversions: public read"
   on asset_conversions for select
                                              using (true);
+
+-- processing_jobs: public read (uploader polls/subscribes for their job status)
+create policy "processing_jobs: public read"
+  on processing_jobs for select
+  using (true);
 
 
 -- ── SEED: DEMO EVENT ────────────────────────────────────────

@@ -1,5 +1,8 @@
 from PIL import Image
+from pillow_heif import register_heif_opener
 import io
+
+register_heif_opener()
 
 def compress_image(data: bytes):
     image = Image.open(io.BytesIO(data))

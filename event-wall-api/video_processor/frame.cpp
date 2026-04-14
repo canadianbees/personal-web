@@ -158,8 +158,8 @@ void save_frame_as_webp(const AVFrame *frame, const std::string &outdir, int max
 
     const int new_h = frame->height * max_w / frame->width;
     cv::Mat frame_mat(bgr->height, bgr->width, CV_8UC3, bgr->data[0], bgr->linesize[0]);
-    cv::resize(frame_mat, frame_mat, cv::Size(max_w, new_h));
-    cv::imwrite(outdir + "/thumb.webp", frame_mat);
+    cv::resize(frame_mat, frame_mat, cv::Size(max_w, new_h), 0, 0, cv::INTER_LANCZOS4);
+    cv::imwrite(outdir + "/thumb.webp", frame_mat, {cv::IMWRITE_WEBP_QUALITY, 90});
 
     av_frame_free(&bgr);
 }

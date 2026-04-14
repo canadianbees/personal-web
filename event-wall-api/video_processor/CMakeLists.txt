@@ -8,13 +8,15 @@ pkg_check_modules(FFMPEG REQUIRED
   libavcodec libavformat libswscale libavutil libswresample)
 
 find_package(OpenCV REQUIRED)
+find_package(Threads REQUIRED)
 
 add_executable(video_processor main.cpp encode.cpp frame.cpp)
 target_include_directories(video_processor PRIVATE ${FFMPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 target_link_directories(video_processor PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(video_processor PRIVATE
         avcodec avformat swscale avutil swresample
-        ${OpenCV_LIBS})
+        ${OpenCV_LIBS}
+        Threads::Threads)
 
 find_package(GTest QUIET)
 
@@ -31,6 +33,7 @@ if(GTest_FOUND)
   target_link_libraries(tests PRIVATE
           avcodec avformat swscale avutil swresample
           ${OpenCV_LIBS}
+          Threads::Threads
           GTest::GTest GTest::Main
   )
 
