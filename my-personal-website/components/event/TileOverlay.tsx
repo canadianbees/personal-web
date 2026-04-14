@@ -343,6 +343,7 @@ export default function TileOverlay({ upload, onClose }: Props) {
               ref={videoRef}
               src={videoSrc ?? undefined}
               controls
+              loop
               className="max-h-[80vh] max-w-full rounded-xl"
             />
           ) : (
