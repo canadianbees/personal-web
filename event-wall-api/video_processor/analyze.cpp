@@ -47,6 +47,14 @@ float analyze_complexity(AVFormatContext* fmt_ctx, int video_idx) {
     AVCodecContext* dec = open_decoder(fmt_ctx, video_idx);
     if (!dec) return FALLBACK;
 
+    // Only decode intra (I) frames — skips B/P frame reconstruction entirely.
+    // H.264 keyframes are self-contained, so we get a valid luma sample every
+    // GOP interval (~1–2s for typical event recordings) at a fraction of the
+    // CPU cost.  Without this flag the decoder reconstructs every inter frame
+    // just to support our ~1fps sampling, making the analysis pass as expensive
+    // as a full decode.
+    dec->skip_frame = AVDISCARD_NONINTRA;
+
     AVPacket* pkt  = av_packet_alloc();
     AVFrame*  cur  = av_frame_alloc();
     AVFrame*  prev = av_frame_alloc();
