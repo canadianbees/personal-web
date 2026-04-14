@@ -23,8 +23,8 @@ API_SECRET = os.getenv("API_SECRET")  #TODO: set in Cloud Run env vars
 MAX_UPLOAD_BYTES = 200 * 1024 * 1024  # 200MB
 
 # Limit concurrent processing jobs to avoid OOM — each video job can use ~1GB RAM.
-# 4GiB Cloud Run instance: 3 concurrent jobs = ~3GB peak, leaving 1GB headroom.
-_processing_semaphore = asyncio.Semaphore(3)
+# 8GiB Cloud Run instance: 5 concurrent jobs = ~5GB peak, leaving 3GB headroom.
+_processing_semaphore = asyncio.Semaphore(5)
 
 
 async def verify_secret(api_secret: str = Header(None)):
