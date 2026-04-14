@@ -1,0 +1,11 @@
+#!include:.gitignore
+.gcloudignore
+.git/
+venv/
+coverage_html/
+video_processor/build/
+__pycache__/
+*.pyc
+.coverage
+.pytest_cache/
+tests/

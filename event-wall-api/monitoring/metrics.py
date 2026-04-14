@@ -92,6 +92,12 @@ def record_gcs_latency(prefix: str, latency_ms: float):
 def record_encode_step_latency(step: str, latency_ms: float):
     _write_batch([("encode/step_latency_ms", latency_ms, {"step": step}, False)])
 
+def record_selected_crf(crf: int):
+    _write_batch([("encode/selected_crf", float(crf), {}, True)])
+
+def record_complexity_score(score: float):
+    _write_batch([("encode/complexity_score", score, {}, False)])
+
 
 @contextmanager
 def timed(label: str):

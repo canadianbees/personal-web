@@ -116,16 +116,9 @@ export default function TileOverlay({ upload, onClose }: Props) {
         return
       }
 
-      // Bass boost — lowshelf at 120Hz, +9dB
-      const bassBoost = audioCtx.createBiquadFilter()
-      bassBoost.type      = "lowshelf"
-      bassBoost.frequency.value = 120
-      bassBoost.gain.value      = 9
-
       analyser = audioCtx.createAnalyser()
       analyser.fftSize = 512
-      source.connect(bassBoost)
-      bassBoost.connect(analyser)
+      source.connect(analyser)
       analyser.connect(audioCtx.destination)
 
       const data     = new Uint8Array(analyser.frequencyBinCount)

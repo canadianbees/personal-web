@@ -13,7 +13,8 @@ from storage.gcs import upload_to_gcs, generate_signed_upload_url, download_from
 from db.db import record_upload, record_upload_pending, update_upload, record_conversion, record_processing_start, record_processing_done, record_processing_failed, set_cover_url, rotate_all_covers
 from monitoring.metrics import (
     record_upload_success, record_upload_failure,
-    record_processing_latency, record_compression, record_gcs_latency, record_encode_step_latency, timed
+    record_processing_latency, record_compression, record_gcs_latency,
+    record_encode_step_latency, record_selected_crf, record_complexity_score, timed
 )
 
 app = FastAPI()
@@ -137,6 +138,10 @@ async def process_and_store(raw: bytes, content_type: str, slug: str, event_id: 
             record_processing_latency("video", t["ms"])
             for step, ms in timings.items():
                 record_encode_step_latency(step, ms)
+            if "selected_crf" in timings:
+                record_selected_crf(int(timings["selected_crf"]))
+            if "complexity_score" in timings:
+                record_complexity_score(timings["complexity_score"])
 
             reduct, before_kb, after_kb = calculate_reduction(raw, full)
             record_compression("H264", before_kb, after_kb, reduct)

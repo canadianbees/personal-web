@@ -10,7 +10,7 @@ pkg_check_modules(FFMPEG REQUIRED
 find_package(OpenCV REQUIRED)
 find_package(Threads REQUIRED)
 
-add_executable(video_processor main.cpp encode.cpp frame.cpp)
+add_executable(video_processor main.cpp encode.cpp frame.cpp analyze.cpp)
 target_include_directories(video_processor PRIVATE ${FFMPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 target_link_directories(video_processor PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(video_processor PRIVATE
@@ -25,8 +25,10 @@ if(GTest_FOUND)
           tests/test_frame.cpp
           tests/test_encode.cpp
           tests/test_main.cpp
+          tests/test_analyze.cpp
           frame.cpp
           encode.cpp
+          analyze.cpp
   )
   target_include_directories(tests PRIVATE ${FFMPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
   target_link_directories(tests PRIVATE ${FFMPEG_LIBRARY_DIRS})

@@ -28,7 +28,7 @@ async def compress_video(raw: bytes) -> tuple[bytes, bytes, bytes, dict[str, flo
 
         timings: dict[str, float] = {}
         for line in result.stderr.decode().splitlines():
-            if line.startswith("TIMING "):
+            if line.startswith("TIMING ") or line.startswith("INFO "):
                 parts = line.split()
                 if len(parts) == 3:
                     try:
