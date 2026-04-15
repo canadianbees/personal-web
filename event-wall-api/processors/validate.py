@@ -5,24 +5,18 @@ MAGIC_BYTES = {
     ]
 }
 
-def validate_file_type(raw: bytes, content_type:str) -> bool:
-    kind = 'video' if 'video' in content_type else 'image'
+HEIC_BRANDS = {b'heic', b'heix', b'hevc', b'mif1', b'msf1'}
 
-    match kind:
+def validate_file_type(raw: bytes, content_type: str) -> bool:
+    if 'video' in content_type:
+        return raw[4:8] == b'ftyp'
 
-        case "video":
-            if raw[4:8] == b'ftyp':
-                return True
-            return False
+    if 'image' in content_type:
+        if raw.startswith(b'RIFF'):
+            return raw[8:12] == b'WEBP'
+        # HEIC: ftyp box with a heic/heix brand
+        if raw[4:8] == b'ftyp' and raw[8:12] in HEIC_BRANDS:
+            return True
+        return any(raw.startswith(sig) for sig in MAGIC_BYTES['image'])
 
-        case "image":
-            if raw.startswith(b'RIFF'):
-                return raw[8:12] == b'WEBP'
-
-            for signature in MAGIC_BYTES['image']:
-                if raw.startswith(signature):
-                    return True
-            return False
-
-        case _:
-            return False
+    return False

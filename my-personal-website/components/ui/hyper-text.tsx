@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { AnimatePresence, motion, MotionProps } from "motion/react"
+import { motion, MotionProps } from "motion/react"
+
+const MotionDiv = motion.create("div", { forwardMotionProps: true })
 
 import { cn } from "@/lib/utils"
 
@@ -36,17 +38,16 @@ export function HyperText({
   textCase = "upper",
   ...props
 }: HyperTextProps) {
-  const MotionComponent = motion.create(Component, {
-    forwardMotionProps: true,
-  })
-
+  const [mounted, setMounted] = useState(false)
   const [displayText, setDisplayText] = useState<string[]>(() =>
-    scrambleText(children, characterSet)
+    children.split("")
   )
   const [isUnscrambled, setIsUnscrambled] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
   const iterationCount = useRef(0)
   const elementRef = useRef<HTMLElement>(null)
+
+  useEffect(() => { setMounted(true) }, [])
 
   const handleMouseEnter = () => {
     if (isUnscrambled || isAnimating) return
@@ -89,27 +90,33 @@ export function HyperText({
     return () => cancelAnimationFrame(animationFrameId)
   }, [isAnimating, children, duration, characterSet])
 
+  if (!mounted) {
+    return (
+      <div className={cn("overflow-hidden py-2 text-4xl font-bold", className)}>
+        {textCase === "upper" ? children.toUpperCase() : textCase === "lower" ? children.toLowerCase() : children}
+      </div>
+    )
+  }
+
   return (
-    <MotionComponent
-      ref={elementRef}
+    <MotionDiv
+      ref={elementRef as React.RefObject<HTMLDivElement>}
       className={cn("overflow-hidden py-2 text-4xl font-bold", className)}
       onMouseEnter={handleMouseEnter}
       {...props}
     >
-      <AnimatePresence>
-        {displayText.map((letter, index) => (
-          <motion.span
-            key={index}
-            className={cn(letter === " " ? "w-3" : "")}
-          >
-            {textCase === "upper"
-              ? letter.toUpperCase()
-              : textCase === "lower"
-              ? letter.toLowerCase()
-              : letter}
-          </motion.span>
-        ))}
-      </AnimatePresence>
-    </MotionComponent>
+      {displayText.map((letter, index) => (
+        <motion.span
+          key={index}
+          className={cn(letter === " " ? "w-3" : "")}
+        >
+          {textCase === "upper"
+            ? letter.toUpperCase()
+            : textCase === "lower"
+            ? letter.toLowerCase()
+            : letter}
+        </motion.span>
+      ))}
+    </MotionDiv>
   )
 }

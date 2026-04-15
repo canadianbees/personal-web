@@ -6,8 +6,11 @@ const sections = [
   { label: "experience", href: "#experience" },
   { label: "projects", href: "#projects" },
   { label: "music", href: "#music" },
-  { label: "photography", href: "#photo" }
+  { label: "photography", href: "#photo" },
+]
 
+const externalLinks = [
+  { label: "event wall", href: "/event/demo/wall" },
 ]
 
 const Navbar = () => {
@@ -32,6 +35,16 @@ const Navbar = () => {
             key={href}
             href={href}
             onClick={(e) => handleClick(e, href)}
+            className="font-mono text-white/60 hover:text-yellow-300 transition-colors duration-200 whitespace-nowrap"
+          >
+            {label}
+          </a>
+        ))}
+        <span className="text-white/20">|</span>
+        {externalLinks.map(({ label, href }) => (
+          <a
+            key={href}
+            href={href}
             className="font-mono text-white/60 hover:text-yellow-300 transition-colors duration-200 whitespace-nowrap"
           >
             {label}

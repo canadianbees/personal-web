@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} bg-[#D3A1B9] overflow-y-scroll overflow-x-hidden`}>
           <StarsCanvas/>
           {children}

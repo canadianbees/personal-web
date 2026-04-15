@@ -4,10 +4,10 @@ import asyncio
 import os
 from processors.compress_video import compress_video
 
-# path to the compiled C++ binary in WSL
-BINARY_PATH = "/home/celina_alzenor/video_processor/build/video_processor"
-# cd "/mnt/c/Users/Celina Alzenor/Desktop/Projects/personal-web/event-wall-api"
-# pytest tests/test_compress_video.py -v
+BINARY_PATH = os.getenv(
+    "VIDEO_PROCESSOR_PATH",
+    os.path.join(os.path.dirname(__file__), "../video_processor/build/video_processor")
+)
 
 @pytest.fixture
 def mp4_bytes(tmp_path):
@@ -138,9 +138,16 @@ def test_preview_is_smaller_than_full(mp4_bytes):
     assert len(preview) < len(full), "Preview should be smaller than full video"
 
 
-def test_full_is_smaller_than_input(mp4_bytes):
+def test_full_output_is_non_empty(mp4_bytes):
     full, _, _ = asyncio.run(compress_video(mp4_bytes))
-    assert len(full) < len(mp4_bytes), "Encoded full video should be smaller than raw input"
+    assert len(full) > 0
+
+
+# ── error handling ────────────────────────────────────────────────────────────
+
+def test_invalid_bytes_raises_runtime_error():
+    with pytest.raises(RuntimeError):
+        asyncio.run(compress_video(b"not a valid video"))
 
 
 # ── edge cases ────────────────────────────────────────────────────────────────

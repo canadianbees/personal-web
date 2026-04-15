@@ -1,5 +1,7 @@
 import subprocess
+import io
 import pytest
+from PIL import Image
 from processors.validate import validate_file_type
 
 @pytest.fixture
@@ -22,11 +24,9 @@ def png_file(tmp_path):
 
 @pytest.fixture
 def webp_file(tmp_path):
+    # ffmpeg's default build doesn't include libwebp — use Pillow instead
     output = tmp_path / "test.webp"
-    subprocess.run([
-        "ffmpeg", "-f", "lavfi", "-i", "color=green:size=640x480:duration=1",
-        "-frames:v", "1", str(output)
-    ], check=True, capture_output=True)
+    Image.new("RGB", (640, 480), color=(0, 128, 0)).save(str(output), "WEBP")
     return output
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def test_invalid_video_returns_false(invalid_file):
     assert validate_file_type(raw, "video/mp4") == False
 
 def test_unknown_content_type_returns_false(invalid_file):
-    # unknown content type hits case _ and returns False
+    # unknown content type returns False
     raw = invalid_file.read_bytes()
     assert validate_file_type(raw, "application/octet-stream") == False
 

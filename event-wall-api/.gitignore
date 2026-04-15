@@ -1,0 +1,21 @@
+# environment
+.env
+venv/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# testing / coverage
+.coverage
+coverage_html/
+.pytest_cache/
+
+# c++ build
+video_processor/build/
+
+# ide / os
+.idea/
+.DS_Store
