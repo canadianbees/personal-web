@@ -3,5 +3,10 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  # NEXT_PUBLIC_* vars are intentionally inlined into the JS bundle at build time.
+  # Netlify's secrets scanner flags them as "leaked" — suppress the false positives.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_ADMIN_EMAIL"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
