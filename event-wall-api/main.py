@@ -71,12 +71,20 @@ class _BatchProcessRequest(BaseModel):
 @app.post("/upload/batch-process", dependencies=[Depends(verify_secret)])
 async def upload_batch_process(req: _BatchProcessRequest, bg: BackgroundTasks):
     """Kicks off processing for all files already uploaded to GCS via /upload/batch-init."""
-    upload_ids = []
-    for item in req.files:
-        upload_id = str(uuid.uuid4())
-        bg.add_task(process_from_gcs, item.gcs_path, item.content_type, req.event_slug, req.event_id, upload_id)
-        upload_ids.append(upload_id)
-    return {"upload_ids": upload_ids}
+    # Build (upload_id, item) pairs first so IDs are returned before processing starts.
+    jobs = [(str(uuid.uuid4()), item) for item in req.files]
+
+    async def run_all():
+        # asyncio.gather runs all jobs concurrently within a single BackgroundTask.
+        # BackgroundTasks (unlike create_task) are awaited by Uvicorn on shutdown,
+        # so a Cloud Run instance replacement won't orphan in-flight jobs.
+        await asyncio.gather(*[
+            process_from_gcs(item.gcs_path, item.content_type, req.event_slug, req.event_id, upload_id)
+            for upload_id, item in jobs
+        ])
+
+    bg.add_task(run_all)
+    return {"upload_ids": [upload_id for upload_id, _ in jobs]}
 
 
 @app.post("/upload/process", dependencies=[Depends(verify_secret)])
