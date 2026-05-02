@@ -36,7 +36,7 @@ export async function GET() {
         const fileName = item.name;
         return {
           id: fileName,
-          url: `/api/gallery_file?name=${encodeURIComponent(fileName)}`,
+          url: `/api/gallery_file?v=2&name=${encodeURIComponent(fileName)}`,
           title: fileName.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " "),
           subtitle: "Collection",
         };
