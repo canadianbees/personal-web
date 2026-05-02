@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleAuth } from "google-auth-library"
 import crypto from "crypto"
+import { CACHE_PRIVATE_1D } from "@/lib/cache"
 
 const GCS_SERVICE_ACCOUNT_KEY = process.env.GCS_SERVICE_ACCOUNT_KEY
 const GCS_EVENT_BUCKET = process.env.GCS_EVENT_BUCKET
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
         "Content-Type": res.headers.get("content-type") ?? "application/octet-stream",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": CACHE_PRIVATE_1D,
       },
     })
   } catch (error) {

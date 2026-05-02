@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleAuth } from "google-auth-library"
+import { CACHE_PRIVATE_1H } from "@/lib/cache"
 
 const GCS_SERVICE_ACCOUNT_KEY = process.env.GCS_SERVICE_ACCOUNT_KEY
 const GCS_EVENT_BUCKET = process.env.GCS_EVENT_BUCKET
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
   const responseHeaders: Record<string, string> = {
     "Content-Type": upstream.headers.get("content-type") ?? "video/mp4",
     "Accept-Ranges": "bytes",
-    "Cache-Control": "private, max-age=3600",
+    "Cache-Control": CACHE_PRIVATE_1H,
   }
 
   const contentRange = upstream.headers.get("content-range")

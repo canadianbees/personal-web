@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
 import sharp from "sharp";
+import { CACHE_PRIVATE_1D } from "@/lib/cache";
 
 const GCS_SERVICE_ACCOUNT_KEY = process.env.GCS_SERVICE_ACCOUNT_KEY;
 
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(optimized as unknown as BodyInit, {
       headers: {
         "Content-Type": "image/webp",
-        "Cache-Control": "private, max-age=86400",
+        "Cache-Control": CACHE_PRIVATE_1D,
       },
     });
   } catch (error) {
