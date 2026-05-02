@@ -28,9 +28,10 @@ export async function GET(req: NextRequest) {
     const client = await auth.getClient();
     const token = await client.getAccessToken();
 
-    const gcsUrl = `https://storage.googleapis.com/storage/v1/b/${process.env.PHOTO_BUCKET}/o/${fileName}?alt=media`;
+    const gcsUrl = `https://storage.googleapis.com/storage/v1/b/${process.env.PHOTO_BUCKET}/o/${encodeURIComponent(fileName)}?alt=media`;
     const res = await fetch(gcsUrl, {
-      headers: { Authorization: `Bearer ${token.token}`, cache: "no-store" },
+      headers: { Authorization: `Bearer ${token.token}` },
+      cache: "no-store",
     });
 
     const buffer = Buffer.from(await res.arrayBuffer());
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(optimized as unknown as BodyInit, {
       headers: {
         "Content-Type": "image/webp",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": "private, max-age=86400",
       },
     });
   } catch (error) {
