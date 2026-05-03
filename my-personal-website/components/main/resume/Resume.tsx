@@ -66,7 +66,7 @@ const ResumeCard = ({
   return (
     <figure
       className={cn(
-        "relative h-full xs:w-10 md:w-125 cursor-pointer overflow-hidden rounded-xl border p-4 bg-white/5 border-white/5 backdrop-blur-md text-white p-3"
+        "relative h-full w-full md:w-125 cursor-pointer overflow-hidden rounded-xl border p-4 bg-white/5 border-white/5 backdrop-blur-md text-white"
       )}
     >
       <div className="flex flex-row items-center gap-2">

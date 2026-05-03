@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "motion/react"
 import { ProcessedData, StreamEntry } from "../utils/types"
 import StatCards from "./StatCard"
@@ -74,7 +74,7 @@ export default function SpotifySection() {
       <Header startYear={startYear} endYear={endYear} data={data} />
       <StatCards data={data} />
       <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-3 gap-6 w-full mx-auto max-w-6xl">
-        <div className="row-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-lg h-129">
+        <div className="row-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-lg h-auto lg:h-129">
           <ArtistTrackButton activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "artists" ? (
             <div className=" gap-3">
@@ -98,7 +98,7 @@ export default function SpotifySection() {
           )}
         </div>
         <Charts className="hidden sm:flex row-span-2" data={data} peakHour={peakHour} />
-        <ObsessionTracker className="col-span-2 row-start-3" monthlyObsessions={data.monthlyObsessions} />
+        <ObsessionTracker className="lg:col-span-2 lg:row-start-3" monthlyObsessions={data.monthlyObsessions} />
       </div>
       <MostLoyalArtist loyalArtists={data.loyalArtists} allYears={data.allYears} />
     </div>

@@ -69,7 +69,7 @@ const Card = ({ src, title, description, onClick }: Props & { onClick: () => voi
         ${hovered ? "rainbow-border-active" : ""}
         rainbow-border
         relative flex flex-col
-        w-80 h-96
+        w-full sm:w-80 h-auto sm:h-96
         font-mono rounded-lg shadow-lg backdrop-blur-lg
         cursor-pointer overflow-hidden
         z-25
@@ -79,7 +79,7 @@ const Card = ({ src, title, description, onClick }: Props & { onClick: () => voi
         <Image src={src} alt={title} fill className="object-cover" />
       </div>
 
-      <div className="p-4 flex flex-col flex-1 overflow-hidden gap-1">
+      <div className="p-4 flex flex-col flex-none sm:flex-1 overflow-hidden gap-1">
         <HyperText className="text-base font-semibold text-white line-clamp-2 h-14">
           {title}
         </HyperText>

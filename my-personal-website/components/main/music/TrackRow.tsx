@@ -66,7 +66,7 @@ const TrackRow = ({ name, artist, plays, index, currentlyPlayingId, onPlay }: {
             <audio ref={audioRef} />
             <button
                 onClick={togglePlay}
-                className="text-white/20 hover:text-yellow-300 transition-colors shrink-0 w-5 flex items-center justify-center"
+                className="text-white/20 hover:text-yellow-300 transition-colors shrink-0 w-8 flex items-center justify-center"
             >
                 {playing ? (
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">

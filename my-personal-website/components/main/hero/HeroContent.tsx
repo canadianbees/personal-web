@@ -27,11 +27,13 @@ const HeroContent = () => {
       <div className='h-full w-full flex flex-col justify-center items-center md:items-start m-auto text-center md:text-start'>
         <motion.div
           variants={slideInFromTop}
-          className="flex flex-col gap-18 font-mono font-bold w-full max-w-full md:gap-5 md:max-w-150 text-4xl md:text-6xl ">
-          <MorphingText texts={["celina alzenor", "software engineer", "platypus enjoyer", "solitaire enthusiast"]} />
+          className="flex flex-col gap-4 font-mono font-bold w-full max-w-full md:gap-5 md:max-w-150 text-4xl md:text-6xl ">
+          <div className="relative h-20 md:h-auto w-full">
+            <MorphingText texts={["celina alzenor", "software engineer", "platypus enjoyer", "solitaire enthusiast"]} />
+          </div>
           <motion.div
             variants={slideInFromLeft(0.8)}
-            className="flex flex-col mt-10 md:mt-15 text-lg text-gray-400 max-w-full md:max-w-100">
+            className="flex flex-col mt-2 md:mt-15 text-lg text-gray-400 max-w-full md:max-w-100">
             <AuroraText speed={5}>
               Seeking new opportunites and roles
             </AuroraText>

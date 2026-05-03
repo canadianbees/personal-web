@@ -11,12 +11,12 @@ const Projects = () => {
         className="
           z-21
           py-20
-          text-[60px] font-bold text-yellow-300
+          text-4xl md:text-[60px] font-bold text-yellow-300
         "
       >
         My Projects
       </HyperText>
-      <div className="flex flex-row flex-wrap justify-center gap-6 px-10 w-full">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-6 px-4 md:px-10 w-full">
         <ProjectCard
           src="/ls/curve_editor.gif"
           title="Curve in Materials and VFX in Lens Studio"
