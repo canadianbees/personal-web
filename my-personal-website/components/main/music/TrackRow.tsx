@@ -25,7 +25,7 @@ const TrackRow = ({ name, artist, plays, index, currentlyPlayingId, onPlay }: {
         if (previewUrl) return
         try {
             const res = await fetch(
-                `https://itunes.apple.com/search?term=${encodeURIComponent(`${name} ${artist}`)}&media=music&limit=1`
+                `/api/itunes_preview?term=${encodeURIComponent(`${name} ${artist}`)}`
             )
             const data = await res.json()
             if (data.results?.[0]?.previewUrl) {

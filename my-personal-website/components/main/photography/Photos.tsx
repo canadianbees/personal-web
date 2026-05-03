@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "motion/react"
+import exifr from 'exifr'
 
 interface PhotoItem {
     id: string
@@ -9,12 +10,16 @@ interface PhotoItem {
     subtitle: string
 }
 
+type ExifOrientation = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+
 export default function PhotoGallery({ initialItems = [] }: { initialItems?: PhotoItem[] }) {
     const [items, setItems] = useState<PhotoItem[]>(initialItems)
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [loading, setLoading] = useState(initialItems.length === 0)
     const [visibleItems, setVisibleItems] = useState(7)
     const [sectionVisible, setSectionVisible] = useState(false)
+    const [orientations, setOrientations] = useState<Record<string, ExifOrientation>>({})
+    const [imageSizes, setImageSizes] = useState<Record<string, { w: number; h: number }>>({})
     const sectionRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -22,7 +27,6 @@ export default function PhotoGallery({ initialItems = [] }: { initialItems?: Pho
             try {
                 const res = await fetch("/api/gallery")
                 const data = await res.json()
-                console.log("API Data:", data);
                 setItems(data.images)
             } catch (e) {
                 console.error("Failed to load gallery images", e)
@@ -42,7 +46,85 @@ export default function PhotoGallery({ initialItems = [] }: { initialItems?: Pho
         return () => observer.disconnect()
     }, [])
 
+    useEffect(() => {
+        const toLoad = items.slice(0, visibleItems).filter(
+            (item) => orientations[item.id] === undefined
+        )
+        if (toLoad.length === 0) return
+        toLoad.forEach(async (item) => {
+            try {
+                const data = await exifr.parse(item.url, ['Orientation'])
+                setOrientations((prev) => ({
+                    ...prev,
+                    [item.id]: (data?.Orientation as ExifOrientation) ?? 1,
+                }))
+            } catch {
+                setOrientations((prev) => ({ ...prev, [item.id]: 1 }))
+            }
+        })
+    }, [items, visibleItems])
+
     const selectedItem = items.find((item) => item.id === selectedId)
+
+    // Orientations 6/8 need 90° rotation — the image file is landscape but should display portrait
+    const isRotated90 = (o: ExifOrientation | undefined) => o === 6 || o === 8
+    const getRotation = (o: ExifOrientation | undefined) => {
+        if (o === 6) return 'rotate(90deg)'
+        if (o === 8) return 'rotate(-90deg)'
+        if (o === 3) return 'rotate(180deg)'
+        return undefined
+    }
+
+    const renderGalleryImage = (item: PhotoItem) => {
+        const orientation = orientations[item.id]
+        const rotation = getRotation(orientation)
+        const rotated = isRotated90(orientation)
+        const sizes = imageSizes[item.id]
+
+        const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+            const img = e.currentTarget
+            if (!imageSizes[item.id]) {
+                setImageSizes((prev) => ({
+                    ...prev,
+                    [item.id]: { w: img.naturalWidth, h: img.naturalHeight },
+                }))
+            }
+        }
+
+        if (rotated && sizes) {
+            // Image file is landscape (w > h). After 90° rotation it's portrait.
+            // Wrapper uses portrait aspect ratio so columns allocates correct space.
+            const aspectRatio = sizes.h / sizes.w // e.g. 3024/4032 = 0.75
+            const scale = 1 / aspectRatio // e.g. 1.333
+            return (
+                <div
+                    style={{ paddingTop: `${(1 / aspectRatio) * 100}%`, position: 'relative', overflow: 'hidden' }}
+                >
+                    <img
+                        src={item.url}
+                        alt={item.title}
+                        onLoad={handleLoad}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        style={{
+                            transform: `${rotation} scale(${scale})`,
+                            transformOrigin: 'center center',
+                        }}
+                    />
+                </div>
+            )
+        }
+
+        return (
+            <img
+                src={item.url}
+                alt={item.title}
+                width={500}
+                onLoad={handleLoad}
+                className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                style={rotation ? { transform: rotation } : undefined}
+            />
+        )
+    }
 
     return (
         <div ref={sectionRef} className="flex flex-col  gap-10 w-full min-h-screen font-mono py-20 px-4 md:px-10">
@@ -65,13 +147,7 @@ export default function PhotoGallery({ initialItems = [] }: { initialItems?: Pho
                                 className="relative break-inside-avoid cursor-pointer group rounded-xl overflow-hidden border border-white/10 bg-white/5"
                                 whileHover={{ y: -5 }}
                             >
-                                <img
-                                    src={item.url}
-                                    alt={item.title}
-                                    width={500}
-                                    height={500}
-                                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
+                                {renderGalleryImage(item)}
 
                                 {/* Hover Overlay */}
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
@@ -105,6 +181,7 @@ export default function PhotoGallery({ initialItems = [] }: { initialItems?: Pho
                                         src={selectedItem.url}
                                         alt={selectedItem.title}
                                         className="max-h-[45vh] md:max-h-[70vh] w-auto object-contain rounded-2xl"
+                                        style={{ imageOrientation: 'from-image' }}
                                     />
                                 </div>
 
@@ -129,7 +206,10 @@ export default function PhotoGallery({ initialItems = [] }: { initialItems?: Pho
             {sectionVisible && visibleItems < items.length && (
                 <button
                     className="fixed bottom-6 right-6 z-40 backdrop-blur-lg flex items-center gap-1.5 px-6 py-2 rounded-full bg-yellow-300/10 border border-yellow-300/20 text-yellow-300 text-xs font-mono hover:bg-yellow-300/20 transition-all shadow-lg"
-                    onClick={() => setVisibleItems(prev => prev + 20)}
+                    onClick={() => {
+                        setVisibleItems(prev => prev + 20)
+                        sectionRef.current?.scrollIntoView({ behavior: "smooth" })
+                    }}
                 >
                     load more
                 </button>
