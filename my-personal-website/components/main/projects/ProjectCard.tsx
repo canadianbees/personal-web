@@ -6,6 +6,7 @@ import { HyperText } from "@/components/ui/hyper-text"
 
 interface Props {
   src: string
+  videoSrc?: string
   title: string
   description: string
   link?: string
@@ -53,7 +54,7 @@ const cardTransition = {
 }
 
 
-const Card = ({ src, title, description, onClick }: Props & { onClick: () => void }) => {
+const Card = ({ src, videoSrc, title, description, onClick }: Props & { onClick: () => void }) => {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -76,7 +77,18 @@ const Card = ({ src, title, description, onClick }: Props & { onClick: () => voi
       `}
     >
       <div className="relative w-full h-48 shrink-0 overflow-hidden bg-white/5">
-        <Image src={src} alt={title} fill className="object-cover" />
+        {videoSrc ? (
+          <video
+            src={videoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Image src={src} alt={title} fill sizes="(max-width: 640px) 100vw, 320px" className="object-cover" />
+        )}
       </div>
 
       <div className="p-4 flex flex-col flex-none sm:flex-1 overflow-hidden gap-1">
@@ -91,7 +103,7 @@ const Card = ({ src, title, description, onClick }: Props & { onClick: () => voi
 }
 
 
-const Modal = ({ src, title, description, link, onClose }: Props & { onClose: () => void }) => (
+const Modal = ({ src, videoSrc, title, description, link, onClose }: Props & { onClose: () => void }) => (
   <motion.div
     className="fixed inset-0 z-50 flex items-center justify-center p-4"
     variants={backdropVariants}
@@ -114,7 +126,18 @@ const Modal = ({ src, title, description, link, onClose }: Props & { onClose: ()
       onClick={(e) => e.stopPropagation()}
     >
       <div className="relative w-full h-56">
-        <Image src={src} alt={title} fill className="object-cover rounded-t-2xl" />
+        {videoSrc ? (
+          <video
+            src={videoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover rounded-t-2xl"
+          />
+        ) : (
+          <Image src={src} alt={title} fill sizes="(max-width: 640px) 100vw, 672px" className="object-cover rounded-t-2xl" />
+        )}
       </div>
 
       <div className="p-6">

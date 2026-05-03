@@ -88,6 +88,15 @@ function Resume() {
 
  {/* Mobile - vertical */}
 <div className="relative flex md:hidden flex-row w-full h-screen overflow-hidden">
+  <a
+    href="/api/resume"
+    className="absolute bottom-6 right-4 z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-300/10 border border-yellow-300/20 text-yellow-300 text-xs font-mono hover:bg-yellow-300/20 transition-all backdrop-blur-lg shadow-lg"
+  >
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+      <path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    </svg>
+    download resume
+  </a>
   
   {/* Scrolling title on the left */}
   <div className="w-10 h-full overflow-hidden">
@@ -107,7 +116,7 @@ function Resume() {
 
 
       {/* Desktop */}
-<div className="hidden md:flex flex-col justify-center min-h-screen w-full  z-21">
+<div className="hidden md:flex flex-col justify-center min-h-screen w-full  z-21 relative">
   <div className="mt-20 w-full text-center overflow-hidden">
     <ScrollVelocityContainer className="text-5xl font-bold tracking-[-0.02em] md:text-7xl md:leading-20">
       <ScrollVelocityRow className="text-yellow-300" baseVelocity={20} direction={-1}>
@@ -122,6 +131,17 @@ function Resume() {
     </Marquee>
     <div className="pointer-events-none absolute inset-y-0 left-0 w-1/8 bg-linear-to-r from-black to-transparent" />
     <div className="pointer-events-none absolute inset-y-0 right-0 w-1/8 bg-linear-to-l from-black to-transparent" />
+  </div>
+  <div className="flex justify-center mt-8">
+    <a
+      href="/api/resume"
+      className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-yellow-300/10 border border-yellow-300/20 text-yellow-300 text-sm font-mono hover:bg-yellow-300/20 transition-all backdrop-blur-lg shadow-lg"
+    >
+      <svg width="14" height="14" viewBox="0 0 12 12" fill="currentColor">
+        <path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      </svg>
+      download resume
+    </a>
   </div>
 </div>
     </>

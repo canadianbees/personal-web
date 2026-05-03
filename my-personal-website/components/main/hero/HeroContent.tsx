@@ -5,7 +5,7 @@ import { MorphingText } from "@/components/ui/morphing-text"
 import { OrbitingCircles } from '@/components/ui/orbiting-circles';
 import StackIcon from "tech-stack-icons";
 import { AuroraText } from '@/components/ui/aurora-text';
-import { Avatar } from "@mui/material";
+import Image from "next/image";
 import { DeviconCplusplus } from '../../icons/DeviconCplusplus'
 import DeviconTypescript from '@/components/icons/DeviconTypescript';
 import DeviconPython from '@/components/icons/DeviconPython';
@@ -14,6 +14,7 @@ import DeviconGithubactions from '@/components/icons/DeviconGithubactions';
 import { Linkedin } from '@styled-icons/simple-icons'
 import { Github } from '@styled-icons/simple-icons'
 import { Docker } from '@styled-icons/simple-icons'
+import { Maildotru } from '@styled-icons/simple-icons'
 import { Go } from '@styled-icons/simple-icons'
 import { Openai } from '@styled-icons/simple-icons'
 
@@ -35,11 +36,12 @@ const HeroContent = () => {
             variants={slideInFromLeft(0.8)}
             className="flex flex-col mt-2 md:mt-15 text-lg text-gray-400 max-w-full md:max-w-100">
             <AuroraText speed={5}>
-              Seeking new opportunites and roles
+              Seeking new opportunities and roles
             </AuroraText>
             <div className="flex flex-row gap-5 justify-center lg:justify-start">
               <a href="https://www.linkedin.com/in/celina-alzenor/">  <Linkedin size={25} color="#0A66C2" /> </a>
               <a href="https://github.com/canadianbees"><Github size={25} color="#FFFFFF" /></a>
+              <a href={`mailto:${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`}><Maildotru size={25} color="#FFFFFF" /></a>
             </div>
           </motion.div>
         </motion.div>
@@ -56,7 +58,16 @@ const HeroContent = () => {
           <DeviconTypescript width="8em" height="8em" />
           <DeviconJava width="8em" height="8em" />
         </OrbitingCircles>
-        <Avatar className="z-[-1]" sx={{ width: 540, height: 544 }} src='/DSC01275.jpg' />
+        <div className="z-[-1] relative w-75 h-75 md:w-135 md:h-136 rounded-full overflow-hidden">
+          <Image
+            src="/api/portfolio_file?path=project_assets/hero.jpg"
+            alt="Celina Alzenor"
+            fill
+            sizes="(max-width: 768px) 300px, 540px"
+            className="object-cover"
+            priority
+          />
+        </div>
         <OrbitingCircles radius={200} iconSize={50} reverse path={false}>
           <StackIcon name="gcloud" variant="dark" />
           <Docker size={100} color="#2560FF" />

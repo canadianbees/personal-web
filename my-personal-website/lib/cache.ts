@@ -8,3 +8,4 @@
 export const CACHE_PRIVATE_1D  = "private, max-age=86400"   // browser: 1 day
 export const CACHE_PRIVATE_1H  = "private, max-age=3600"    // browser: 1 hour
 export const CACHE_NO_STORE    = "no-store"                  // nothing cached
+export const CACHE_PRIVATE_1Y  = "private, max-age=31536000"  // browser: 1 year (immutable static assets)

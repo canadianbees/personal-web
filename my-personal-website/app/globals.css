@@ -1,9 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css/prefix";
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Declare runtime CSS custom properties so the CSS linter can resolve them.
+   Actual values are injected at runtime by Next.js fonts, Tailwind, and animation components. */
+:root {
+  --font-cedarville: "Cedarville Cursive", cursive;
+  --duration: 1s;
+  --speed: 1s;
+  --angle: 0deg;
+  --pulse-color: #ffffff;
+  --gap: 1rem;
+}
 
 @keyframes ripple {
   0%   { transform: scale(1); opacity: 0.8; }
@@ -11,7 +21,7 @@
 }
 
 .cursive {
-  font-family: "Cedarville Cursive", cursive;
+  font-family: var(--font-cedarville), cursive;
 }
 
 .Welcome-text {
@@ -130,7 +140,7 @@ html {
 ;
   @keyframes aurora {
   0% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
     transform: rotate(-5deg) scale(0.9);
     }
   25% {
@@ -142,11 +152,11 @@ html {
     transform: rotate(-3deg) scale(0.95);
     }
   75% {
-    background-position: 50% 0%;
+    background-position: 50% 0;
     transform: rotate(3deg) scale(1.05);
     }
   100% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
     transform: rotate(-5deg) scale(0.9);
     }
   }
@@ -158,7 +168,7 @@ html {
   --color-color-1: var(--color-1);
   @keyframes rainbow {
   0% {
-    background-position: 0%;
+    background-position: 0;
     }
   100% {
     background-position: 200%;
@@ -167,10 +177,10 @@ html {
   --animate-pulse: pulse var(--duration) ease-out infinite;
   @keyframes pulse {
   0%, 100% {
-    boxShadow: 0 0 0 0 var(--pulse-color);
+    box-shadow: 0 0 0 0 var(--pulse-color);
     }
   50% {
-    boxShadow: 0 0 0 8px var(--pulse-color);
+    box-shadow: 0 0 0 8px var(--pulse-color);
     }
   }
   --animate-marquee: marquee var(--duration) infinite linear;
