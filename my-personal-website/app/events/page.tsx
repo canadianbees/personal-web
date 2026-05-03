@@ -1,5 +1,7 @@
+import Link from "next/link"
 import { createServerSupabaseClient } from "@/lib/supabase-server"
 import type { EventRow } from "@/lib/types"
+import { eventFileUrl } from "@/lib/utils"
 
 export default async function EventsPage() {
   const supabase = await createServerSupabaseClient()
@@ -10,7 +12,10 @@ export default async function EventsPage() {
 
   return (
     <main className="min-h-screen bg-black p-8">
-      <h1 className="text-white text-3xl font-serif mb-8">events</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-white text-3xl font-serif">events</h1>
+        <Link href="/" className="text-white/40 text-sm hover:text-white transition">← home</Link>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {(events as EventRow[] ?? []).map((event) => (
           <a
@@ -20,9 +25,9 @@ export default async function EventsPage() {
           >
             {event.cover_url && (
               <img
-                src={event.cover_url}
+                src={eventFileUrl(event.cover_url)}
                 alt={event.name}
-                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition"
+                className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition"
               />
             )}
             <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent">

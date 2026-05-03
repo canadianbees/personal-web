@@ -4,12 +4,8 @@ import { MessageCircle } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { UploadRow } from "@/lib/types"
 import TileOverlay from "./TileOverlay"
+import { eventFileUrl } from "@/lib/utils"
 
-function eventFileUrl(path: string | null | undefined): string {
-  if (!path) return ""
-  if (path.startsWith("http")) return path
-  return `/api/event_file?path=${encodeURIComponent(path)}`
-}
 
 function getAr(upload: UploadRow) {
   return upload.width && upload.height ? upload.width / upload.height : 16 / 9
@@ -116,7 +112,7 @@ export default function MosaicWall({ eventId }: Props) {
             {row.uploads.map((upload) => (
               <div
                 key={upload.id}
-                className="relative overflow-hidden cursor-pointer flex-shrink-0 rounded-xl group/tile"
+                className="relative overflow-hidden cursor-pointer shrink-0 rounded-xl group/tile"
                 style={{ width: row.height * getAr(upload) - 4, height: row.height }}
                 onClick={() => setSelected(upload)}
               >
@@ -157,7 +153,7 @@ export default function MosaicWall({ eventId }: Props) {
             {pendingUploads.map((u) => (
               <div
                 key={u.id}
-                className="rounded-xl bg-white/10 animate-pulse flex-shrink-0"
+                className="rounded-xl bg-white/10 animate-pulse shrink-0"
                 style={{ width: targetH * (16 / 9), height: targetH }}
               />
             ))}

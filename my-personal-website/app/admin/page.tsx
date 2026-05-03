@@ -106,7 +106,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="relative z-10 min-h-screen bg-black/90 backdrop-blur-sm">
+    <main className="relative min-h-screen bg-black/90 backdrop-blur-sm">
       <div className="max-w-2xl mx-auto p-6 sm:p-8">
       <h1 className="text-white text-3xl font-serif mb-8">admin</h1>
 

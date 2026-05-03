@@ -19,7 +19,7 @@ export default function LoginPage() {
   if (sent) {
     return (
       <main className="min-h-screen bg-black flex items-center justify-center">
-        <div className="relative z-10 text-center">
+        <div className="text-center">
           <p className="text-white text-xl">check your email ✉️</p>
           <p className="text-white/40 text-sm mt-2">tap the link to sign in</p>
         </div>
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-black flex items-center justify-center">
-      <div className="relative z-10 text-center flex flex-col items-center gap-4">
+      <div className="text-center flex flex-col items-center gap-4" >
         <h1 className="text-white text-2xl font-serif">admin</h1>
         <button
           onClick={handleLogin}

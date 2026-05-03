@@ -2,12 +2,7 @@
 import { useState } from "react"
 import type { UploadRow } from "@/lib/types"
 import TileOverlay from "@/components/event/TileOverlay"
-
-function eventFileUrl(path: string | null | undefined): string {
-  if (!path) return ""
-  if (path.startsWith("http")) return path
-  return `/api/event_file?path=${encodeURIComponent(path)}`
-}
+import { eventFileUrl } from "@/lib/utils"
 
 interface Props {
   uploads: UploadRow[]

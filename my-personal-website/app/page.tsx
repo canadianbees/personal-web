@@ -23,13 +23,13 @@ export default function Home() {
       <div id="projects" className="snap-start min-h-screen">
         <Projects />
       </div>
-      <div id="music" className="snap-start min-h-screen z-30">
+      <div id="music" className="snap-start min-h-screen">
         <SpotifySection/>
       </div>
-      <div id="photo" className="snap-start min-h-screen z-30">
+      <div id="photo" className="snap-start min-h-screen">
         <PhotoGallery />
       </div>
-      <div id="events" className="snap-start min-h-screen z-30 flex items-center justify-center">
+      <div id="events" className="snap-start min-h-screen flex items-center justify-center">
         <EventsPreview />
       </div>
     </main>

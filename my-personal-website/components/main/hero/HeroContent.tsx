@@ -23,7 +23,7 @@ const HeroContent = () => {
     <motion.div
       initial="hidden"
       animate="visible"
-      className='flex flex-row items-center justify-center px-6 md:px-20 w-full h-screen z-20'>
+      className='flex flex-row items-center justify-center px-6 md:px-20 w-full h-screen'>
       <div className='h-full w-full flex flex-col justify-center items-center md:items-start m-auto text-center md:text-start'>
         <motion.div
           variants={slideInFromTop}

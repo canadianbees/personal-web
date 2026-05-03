@@ -103,6 +103,7 @@ export default function UploadForm({ eventId, eventName, eventSlug }: Props) {
           files: files.map((f) => ({ content_type: f.type || "application/octet-stream" })),
         }),
       })
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!initRes.ok) throw new Error(await initRes.text())
       const { results } = await initRes.json() as { results: { signed_url: string; gcs_path: string }[] }
 
@@ -133,6 +134,7 @@ export default function UploadForm({ eventId, eventName, eventSlug }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ event_slug: eventSlug, event_id: eventId, files: processFiles }),
         })
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         if (!processRes.ok) throw new Error(await processRes.text())
         const data = await processRes.json() as { upload_ids: string[] }
         uploadIds = data.upload_ids
@@ -163,8 +165,8 @@ export default function UploadForm({ eventId, eventName, eventSlug }: Props) {
 
   return (
     <>
-    <div className="fixed inset-0 bg-black -z-10" />
-    <main className="relative z-10 min-h-screen bg-transparent flex flex-col items-center justify-center p-6 gap-6 text-center">
+    <div className="fixed inset-0 bg-black" />
+    <main className="relative min-h-screen bg-transparent flex flex-col items-center justify-center p-6 gap-6 text-center">
       <div>
         <p className="text-white/40 text-xs tracking-widest uppercase mb-1">uploading to</p>
         <h1 className="text-white text-2xl font-serif">{eventName}</h1>

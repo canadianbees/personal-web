@@ -3,12 +3,8 @@ import { useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { supabase } from "@/lib/supabase"
 import type { CommentRow, UploadRow, AssetConversionRow } from "@/lib/types"
+import { eventFileUrl } from "@/lib/utils"
 
-function eventFileUrl(path: string | null | undefined): string {
-  if (!path) return ""
-  if (path.startsWith("http")) return path
-  return `/api/event_file?path=${encodeURIComponent(path)}`
-}
 
 interface Props {
   upload: UploadRow
@@ -130,7 +126,7 @@ export default function TileOverlay({ upload, onClose }: Props) {
 
       // Live palette
       let palette: string[] = [...FALLBACK_COLORS]
-      let paletteRgb:       Array<[number, number, number]> = [[255,80,80],[100,40,255]]
+      const paletteRgb: Array<[number, number, number]> = [[255,80,80],[100,40,255]]
       let targetPaletteRgb: Array<[number, number, number]> = [[255,80,80],[100,40,255]]
 
       const offscreen = document.createElement("canvas")
@@ -335,9 +331,9 @@ export default function TileOverlay({ upload, onClose }: Props) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       {/* Media panel */}
-      <div ref={mediaPanelRef} className="relative z-[52] flex-1 flex flex-col items-center justify-center p-8 gap-3 min-w-0 overflow-hidden">
+      <div ref={mediaPanelRef} className="relative z-52 flex-1 flex flex-col items-center justify-center p-8 gap-3 min-w-0 overflow-hidden">
         {/* Video */}
-        <div className="relative z-[2] flex flex-col items-center gap-3">
+        <div className="relative z-2 flex flex-col items-center gap-3">
           {upload.media_type === "video" ? (
             <video
               ref={videoRef}
@@ -362,11 +358,11 @@ export default function TileOverlay({ upload, onClose }: Props) {
         </div>
 
         {/* Bars + particles canvas — above video */}
-        <canvas ref={barsCanvasRef} className="absolute inset-0 pointer-events-none z-[3]" />
+        <canvas ref={barsCanvasRef} className="absolute inset-0 pointer-events-none z-3" />
       </div>
 
       {/* Comments panel */}
-      <div className="relative z-[52] w-80 bg-gray-950/90 flex flex-col border-l border-white/10 shrink-0">
+      <div className="relative z-52 w-80 bg-gray-950/90 flex flex-col border-l border-white/10 shrink-0">
         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
           <AnimatePresence initial={false}>
             {comments.map((c) => (
@@ -413,7 +409,7 @@ export default function TileOverlay({ upload, onClose }: Props) {
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white/50 hover:text-white text-xl z-[60]"
+        className="absolute top-4 right-4 text-white/50 hover:text-white text-xl z-60"
       >
         ✕
       </button>

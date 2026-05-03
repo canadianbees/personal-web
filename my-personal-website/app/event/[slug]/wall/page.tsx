@@ -12,22 +12,13 @@ export default async function WallPage({ params }: Props) {
   const { slug } = await params
   const supabase = await createServerSupabaseClient()
 
-  const [{ data: current }, { data: allEvents }] = await Promise.all([
-    supabase.from("events").select("*").eq("slug", slug).single(),
-    supabase
-      .from("events")
-      .select("id, name, slug, cover_url, created_at, uploads(count)")
-      .order("created_at", { ascending: false }),
-  ])
+  const { data: current } = await supabase.from("events").select("*").eq("slug", slug).single()
 
   if (!current) notFound()
 
   return (
     <div className="relative min-h-screen bg-black">
-      <EventSwitcher
-        currentEvent={current as EventRow}
-        events={(allEvents as EventRow[]) ?? []}
-      />
+      <EventSwitcher currentEvent={current as EventRow} />
       <MosaicWall eventId={current.id} />
     </div>
   )
