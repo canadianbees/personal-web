@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
 
     const optimized = await sharp(buffer)
       .resize({ width: 1200, withoutEnlargement: true })
-      .webp({ quality: 80 })
+      .webp({ quality: 90 })
       .toBuffer();
 
     return new NextResponse(optimized as unknown as BodyInit, {

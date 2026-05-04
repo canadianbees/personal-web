@@ -66,6 +66,7 @@ const HeroContent = () => {
             sizes="(max-width: 768px) 300px, 540px"
             className="object-cover"
             priority
+            unoptimized
           />
         </div>
         <OrbitingCircles radius={200} iconSize={50} reverse path={false}>
