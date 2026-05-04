@@ -6,8 +6,8 @@ import Resume from "@/components/main/resume/Resume"
 import Navbar from "@/components/main/navigation/Navbar"
 import EventsPreview from "@/components/EventsPreview"
 
-const SpotifySection = dynamic(() => import("@/components/main/music/SpotifySection"), { ssr: false })
-const PhotoGallery = dynamic(() => import("@/components/main/photography/Photos"), { ssr: false })
+const SpotifySection = dynamic(() => import("@/components/main/music/SpotifySection"))
+const PhotoGallery = dynamic(() => import("@/components/main/photography/Photos"))
 
 
 
