@@ -12,7 +12,7 @@ const VideoContainer = () => {
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
             className='w-full h-full object-cover'>
             </BackgroundVideo>
 

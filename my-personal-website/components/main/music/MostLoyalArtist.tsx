@@ -8,9 +8,6 @@ interface MostLoyalArtistProps {
   loyalArtists: LoyalArtist[]
   allYears: string[]
 }
-
-const MAX_SELECTED = 5
-
 const ArtistRow = ({
   artist,
   index,
@@ -107,6 +104,7 @@ export default function MostLoyalArtist({ loyalArtists, allYears }: MostLoyalArt
         </div>
         <button
           onClick={reroll}
+          aria-label="Shuffle artist loyalty view"
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-300/10 border border-yellow-300/20 text-yellow-300 text-xs font-mono hover:bg-yellow-300/20 transition-all"
         >
           🎲

@@ -12,7 +12,7 @@ const resume_items = [
   src="/UCF_Knights_logo.svg"
   width="70"
   height="70"
-  alt="BigQuery"
+  alt="University of Central Florida logo"
 />),
   },
   {
@@ -23,7 +23,7 @@ const resume_items = [
   src="/UCF-CECS.jpg"
   width="70"
   height="70"
-  alt="BigQuery"
+  alt="UCF College of Engineering and Computer Science logo"
 />),
 
   },
@@ -35,7 +35,7 @@ const resume_items = [
   src="/Trellix_Logo.svg"
   width="100"
   height="100"
-  alt="BigQuery"
+  alt="Trellix logo"
 />),
   },
   {
@@ -46,7 +46,7 @@ const resume_items = [
   src="/snapchat.svg"
   width="70"
   height="70"
-  alt="BigQuery"
+  alt="Snapchat logo"
 />),
   },
   

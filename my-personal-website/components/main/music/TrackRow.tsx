@@ -66,6 +66,7 @@ const TrackRow = ({ name, artist, plays, index, currentlyPlayingId, onPlay }: {
             <audio ref={audioRef} />
             <button
                 onClick={togglePlay}
+                aria-label={playing ? `Pause ${name}` : `Play preview of ${name} by ${artist}`}
                 className="text-white/20 hover:text-yellow-300 transition-colors shrink-0 w-8 flex items-center justify-center"
             >
                 {playing ? (

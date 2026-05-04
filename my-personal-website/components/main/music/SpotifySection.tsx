@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "motion/react"
 import { ProcessedData, StreamEntry } from "../utils/types"
 import StatCards from "./StatCard"
@@ -15,11 +15,30 @@ import MostLoyalArtist from "./MostLoyalArtist"
 export default function SpotifySection() {
   const [data, setData] = useState<ProcessedData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [shouldLoad, setShouldLoad] = useState(false)
   const [activeTab, setActiveTab] = useState<"artists" | "tracks">("artists")
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Only start fetching when this section scrolls into view
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
+    if (!shouldLoad) return
     const load = async () => {
       try {
         const { files } = await fetch("/api/spotify_files").then((r) => r.json())
@@ -47,17 +66,20 @@ export default function SpotifySection() {
       }
     }
     load()
-  }, [])
-  if (loading) {
+  }, [shouldLoad])
+  // Placeholder shown before section enters viewport (avoids fetching 300MB off-screen)
+  if (!shouldLoad || loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center font-mono">
-        <motion.div
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="text-yellow-300 text-sm"
-        >
-          loading listening history...
-        </motion.div>
+      <div ref={containerRef} className="min-h-screen w-full flex items-center justify-center font-mono">
+        {(shouldLoad && loading) && (
+          <motion.div
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="text-yellow-300 text-sm"
+          >
+            loading listening history...
+          </motion.div>
+        )}
       </div>
     )
   }
@@ -70,7 +92,7 @@ export default function SpotifySection() {
   const endYear = data.yearlyData[data.yearlyData.length - 1]?.year || ""
 
   return (
-    <div className="min-h-screen w-full font-mono py-20 px-4 md:px-10">
+    <div ref={containerRef} className="min-h-screen w-full font-mono py-20 px-4 md:px-10">
       <Header startYear={startYear} endYear={endYear} data={data} />
       <StatCards data={data} />
       <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-3 gap-6 w-full mx-auto max-w-6xl">

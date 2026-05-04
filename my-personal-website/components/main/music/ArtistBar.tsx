@@ -22,10 +22,12 @@ const ArtistBar = ({ name, plays, hours, max, index, spotifyUrl, appleMusicUrl }
               {name}
             </span>
             <a href={spotifyUrl} target="_blank" rel="noopener noreferrer"
+              aria-label={`Listen to ${name} on Spotify`}
               className="text-white/20 hover:text-[#1DB954] transition-colors shrink-0 p-1.5">
               <Spotify size={10} />
             </a>
             <a href={appleMusicUrl} target="_blank" rel="noopener noreferrer"
+              aria-label={`Listen to ${name} on Apple Music`}
               className="text-white/20 hover:text-[#FC3C44] transition-colors shrink-0 p-1.5">
               <Applemusic size={10} />
             </a>

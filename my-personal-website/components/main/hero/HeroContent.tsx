@@ -39,9 +39,9 @@ const HeroContent = () => {
               Seeking new opportunities and roles
             </AuroraText>
             <div className="flex flex-row gap-5 justify-center lg:justify-start">
-              <a href="https://www.linkedin.com/in/celina-alzenor/">  <Linkedin size={25} color="#0A66C2" /> </a>
-              <a href="https://github.com/canadianbees"><Github size={25} color="#FFFFFF" /></a>
-              <a href={`mailto:${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`}><Maildotru size={25} color="#FFFFFF" /></a>
+              <a href="https://www.linkedin.com/in/celina-alzenor/" aria-label="LinkedIn profile"><Linkedin size={25} color="#0A66C2" /></a>
+              <a href="https://github.com/canadianbees" aria-label="GitHub profile"><Github size={25} color="#FFFFFF" /></a>
+              <a href={`mailto:${process.env.NEXT_PUBLIC_ADMIN_EMAIL}`} aria-label="Send email"><Maildotru size={25} color="#FFFFFF" /></a>
             </div>
           </motion.div>
         </motion.div>
@@ -75,7 +75,7 @@ const HeroContent = () => {
           <Github size={100} color="#FFFFFF" />
           <Openai size={100} color="#FFFFFF" />
           <DeviconGithubactions width="8em" height="8em" />
-          <img src="/BigQuery.svg" width="70" height="70" alt="BigQuery" />
+          <img src="/BigQuery.svg" width="70" height="70" alt="Google BigQuery" />
         </OrbitingCircles>
       </motion.div>
 

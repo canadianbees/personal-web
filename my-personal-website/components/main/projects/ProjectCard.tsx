@@ -166,6 +166,7 @@ const Modal = ({ src, videoSrc, title, description, link, onClose }: Props & { o
       {/* Close */}
       <button
         onClick={onClose}
+        aria-label="Close project details"
         className="
           absolute top-4 right-4
           w-8 h-8 rounded-full
