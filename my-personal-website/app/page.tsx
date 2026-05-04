@@ -1,6 +1,5 @@
 import dynamic from "next/dynamic"
 import Hero from "@/components/main/hero/Hero"
-import VideoContainer from "@/components/main/background/VideoContainer"
 import Projects from "@/components/main/projects/Projects"
 import Resume from "@/components/main/resume/Resume"
 import Navbar from "@/components/main/navigation/Navbar"
@@ -14,8 +13,7 @@ const PhotoGallery = dynamic(() => import("@/components/main/photography/Photos"
 export default function Home() {
   return (
     <main className="relative w-screen h-dvh overflow-x-hidden overflow-y-scroll snap-y snap-mandatory">
-      <VideoContainer />
-      <Navbar />
+<Navbar />
       <div id="home" className="snap-start min-h-dvh">
         <Hero />
       </div>

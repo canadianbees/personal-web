@@ -10,6 +10,7 @@ const sections = [
 ]
 
 const externalLinks = [
+  { label: "fencing", shortLabel: "fence", href: "/fencing" },
   { label: "event wall", shortLabel: "events", href: "/event/demo/wall" },
 ]
 
